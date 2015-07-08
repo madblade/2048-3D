@@ -15,7 +15,7 @@ APP.prototype.getRenderer = function () {
 
 APP.prototype.getCamera = function () {
     var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
-    camera.position.set(-10, 100, 300);
+    camera.position.set(-10, 10, 10);
     return camera;
 };
 
