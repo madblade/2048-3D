@@ -54,6 +54,10 @@ APP = function () {
     this.animate();
 
     this.isTweening = false;
+    this.isUpdating = false;
+    this.cubesToDelete = [];
+    this.cubesToCreate = [];
+    this.numberOfActiveTweens = 0;
 };
 
 APP.prototype.run = function () {
@@ -61,12 +65,17 @@ APP.prototype.run = function () {
     this.meshes = [];
     var i = 1;
 
-    for (var z=0; z<4; z+=1.1)
-        for (var y=0; y<4; y+=1.1)
-            for (var x=0; x<4; x+=1.1)
-                this.addCube(x, y, z, Math.pow(2, i++))
+    // Draw cubes
+    for (var z=0; z<4; z+=1)
+        for (var y=0; y<4; y+=1)
+            for (var x=0; x<4; x+=1)
+                this.addCube(x, y, z, /*Math.pow(2, i++)*/64)
 
     // Draw bounding box
+    this.addBoundingBox();
+};
+
+APP.prototype.addBoundingBox = function() {
     var material = new THREE.LineBasicMaterial({color: 0x0000ff});
     var geometry = new THREE.Geometry();
     var min = -.1-.5;
@@ -105,27 +114,162 @@ APP.prototype.addCube = function (i, j, k, value) {
     var material = new THREE.MeshLambertMaterial({ color: new THREE.Color(r, g, b) });
     var geometry = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
     var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(i, j, k);
+    mesh.position.set(i*1.1, j*1.1, k*1.1);
+    mesh.cubePosition = {i:i, j:j, k:k, val:value};
 
     this.scene.add(mesh);
     this.meshes.push(mesh);
 };
 
-APP.prototype.setupTween = function(obj, prop, targetValue) {
-    var update = function () {
-        obj[prop] = current.property;
-    };
+APP.prototype.updateModel = function (direction) {
+    this.isUpdating = true;
+    this.cubesToDelete = [];
+    this.cubesToCreate = [];
 
-    var current = {property: obj[prop]};
-    var target = {property: targetValue};
+    switch(direction) {
+        case 'left':
+            // X : invariants : Y, Z
 
-    var tween = new TWEEN.Tween(current).to(target, 200)
-        .easing(TWEEN.Easing.Cubic.Out)
-        .onUpdate(update)
-        .onComplete(function() {
-            this.isTweening = false;
-        }.bind(this));
+            for (var y=0; y<4; ++y) { for (var z=0; z<4; ++z) {
 
-    this.isTweening = true;
-    tween.start();
+                // FIRST TWO
+                var first;
+                var x;
+                for (x=0; x<4; ++x) {
+                    first = this.getIJK(x, y, z);
+                    if (first !== undefined) break;
+                }
+                if (first === undefined) continue;
+
+                var second;
+                for (x=first.cubePosition.i+1; x<4; ++x) {
+                    second = this.getIJK(x, y, z);
+                    if (second !== undefined) break;
+                }
+                if (second === undefined) continue;
+
+                // Fusion
+                if (second.cubePosition.val === first.cubePosition.val) {
+                    this.cubesToDelete.push(second);
+                    this.cubesToDelete.push(first);
+                    this.cubesToCreate.push(first.cubePosition);
+                    this.setupTween(second.position, 'x', first.position.x);
+                }
+
+                // Juxtaposition
+                else {
+                    this.setupTween(second.position, 'x', first.position.x+1.1);
+                }
+                this.numberOfActiveTweens ++;
+
+                // LAST TWO
+                var third;
+                for (x=second.cubePosition.i+1; x<4; ++x) {
+                    third = this.getIJK(x, y, z);
+                    if (third !== undefined) break;
+                }
+                if (third === undefined) continue;
+
+                var fourth;
+                for (x=third.cubePosition.i+1; x<4; ++x) {
+                    fourth = this.getIJK(x, y, z);
+                    if (fourth !== undefined) break;
+                }
+                if (fourth === undefined) continue;
+
+                // Fusion
+                if (fourth.cubePosition.val === third.cubePosition.val) {
+                    this.cubesToDelete.push(fourth);
+                    this.cubesToDelete.push(third);
+                    this.cubesToCreate.push(third.cubePosition);
+                    this.setupTween(fourth.position, 'x', third.position.x);
+                }
+
+                // Juxtaposition
+                else {
+                    this.setupTween(fourth.position, 'x', third.position.x+1.1);
+                }
+                this.numberOfActiveTweens ++;
+
+            }}
+
+            break;
+
+        case 'right':
+            for (var y=0; y<4; ++y) { for (var z=0; z<4; ++z) {
+
+                // FIRST TWO
+                var first;
+                var x;
+                for (x=3; x>=0; --x) {
+                    first = this.getIJK(x, y, z);
+                    if (first !== undefined) break;
+                }
+                if (first === undefined) continue;
+
+                var second;
+                for (x=first.cubePosition.i-1; x>=0; --x) {
+                    second = this.getIJK(x, y, z);
+                    if (second !== undefined) break;
+                }
+                if (second === undefined) continue;
+
+                if (second.cubePosition.val === first.cubePosition.val) {
+                    this.cubesToDelete.push(second);
+                    this.cubesToDelete.push(first);
+                    this.cubesToCreate.push(first.cubePosition);
+                    this.setupTween(second.position, 'x', first.position.x);
+                } else {
+                    this.setupTween(second.position, 'x', first.position.x-1.1);
+                }
+                this.numberOfActiveTweens ++;
+
+                // LAST TWO
+                var third;
+                for (x=second.cubePosition.i-1; x>=0; --x) {
+                    third = this.getIJK(x, y, z);
+                    if (third !== undefined) break;
+                }
+                if (third === undefined) continue;
+
+                var fourth;
+                for (x=third.cubePosition.i-1; x>=0; --x) {
+                    fourth = this.getIJK(x, y, z);
+                    if (fourth !== undefined) break;
+                }
+                if (fourth === undefined) continue;
+
+                // Fusion
+                if (fourth.cubePosition.val === third.cubePosition.val) {
+                    this.cubesToDelete.push(fourth);
+                    this.cubesToDelete.push(third);
+                    this.cubesToCreate.push(third.cubePosition);
+                    this.setupTween(fourth.position, 'x', third.position.x);
+                }
+
+                // Juxtaposition
+                else {
+                    this.setupTween(fourth.position, 'x', third.position.x-1.1);
+                }
+                this.numberOfActiveTweens ++;
+
+            }}
+
+            break;
+        default:
+            break;
+    }
+
+    this.isUpdating = false;
+};
+
+APP.prototype.getIJK = function(i, j, k) {
+    var currentMesh;
+    for (var meshId in this.meshes) {
+        currentMesh = this.meshes[meshId];
+        if (currentMesh.cubePosition.i === i && currentMesh.cubePosition.j === j && currentMesh.cubePosition.k === k)
+            return currentMesh;
+    }
+
+    return undefined;
 };
