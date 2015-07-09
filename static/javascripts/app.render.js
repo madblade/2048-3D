@@ -33,15 +33,24 @@ APP.prototype.setupTween = function(obj, prop, targetValue) {
         .onComplete(function() {
             this.numberOfActiveTweens --;
             if (this.numberOfActiveTweens == 0) {
+                console.log("aa");
                 this.deleteCubes(this.cubesToDelete);
                 this.createCubes(this.cubesToCreate);
                 console.log(this.meshes.length);
+
+                this.addNewElements();
+                this.defuse();
             }
             this.isTweening = false;
         }.bind(this));
 
     this.isTweening = true;
     tween.start();
+};
+
+APP.prototype.defuse = function() {
+    for (var meshId in this.meshes)
+        this.meshes[meshId].meta.fused = false;
 };
 
 APP.prototype.deleteCubes = function(cubes) {
@@ -67,4 +76,30 @@ APP.prototype.createCubes = function(cubes) {
         currentCube = cubes[cubeId];
         this.addCube(currentCube.i, currentCube.j, currentCube.k, Math.pow(currentCube.val, 2));
     }
+};
+
+APP.prototype.addNewElements = function() {
+    var i = Math.floor(Math.random()*4);
+    var j = Math.floor(Math.random()*4);
+    var k = Math.floor(Math.random()*4);
+    var currentTry=0;
+    var maxTries = 10000;
+    while (this.isNotValid(i, j, k) && currentTry < maxTries) {
+        i = Math.floor(Math.random()*4);
+        j = Math.floor(Math.random()*4);
+        k = Math.floor(Math.random()*4);
+        currentTry ++;
+    }
+
+    if (currentTry > 9000) {
+        console.log("Loser.");
+    } else {
+        //this.addCube(i, j, k, 2);
+    }
+};
+
+
+APP.prototype.isNotValid = function(i, j, k) {
+    if (this.getIJK(i, j, k) === undefined) return false;
+    return true;
 };

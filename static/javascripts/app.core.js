@@ -63,7 +63,6 @@ APP = function () {
 APP.prototype.run = function () {
 
     this.meshes = [];
-    var i = 1;
 
     // Draw cubes
     for (var z=0; z<4; z+=1)
@@ -115,10 +114,150 @@ APP.prototype.addCube = function (i, j, k, value) {
     var geometry = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
     var mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(i*1.1, j*1.1, k*1.1);
-    mesh.cubePosition = {i:i, j:j, k:k, val:value};
+    mesh.meta = {i:i, j:j, k:k, val:value, nx:i*1.1, ny:j*1.1, nz:k*1.1, fused: false};
 
     this.scene.add(mesh);
     this.meshes.push(mesh);
+};
+
+APP.prototype.getIJKGeneric = function(dimension, variant, invariantOne, invariantTwo) {
+
+    switch (dimension) {
+        case 'x': return this.getIJK(variant, invariantOne, invariantTwo);
+
+        case 'y': return this.getIJK(invariantOne, variant, invariantTwo);
+
+        case 'z': return this.getIJK(invariantOne, invariantTwo, variant);
+    }
+};
+
+APP.prototype.setMetaIJKGeneric = function(dimension, object, value) {
+    switch (dimension) {
+        case 'x':
+            object.meta.i = value;
+            object.meta.nx = value*1.1;
+            break;
+
+        case 'y':
+            object.meta.j = value;
+            object.meta.ny = value*1.1;
+            break;
+
+        case 'z':
+            object.meta.k = value;
+            object.meta.nz = value*1.1;
+            break;
+    }
+};
+
+APP.prototype.setMetaIJKFromObject = function(dimension, receiver, giver, direction, overrides) {
+    var multiplier = direction == '+' ? 1 : -1;
+    var offsetIJK = overrides ? 0 : 1;
+    var offsetXYZ = 1.1*offsetIJK;
+
+    switch (dimension) {
+        case 'x':
+            receiver.meta.i = giver.meta.i + multiplier*offsetIJK;
+            receiver.meta.nx = giver.meta.nx + multiplier*offsetXYZ;
+            break;
+
+        case 'y':
+            receiver.meta.j = giver.meta.j + multiplier*offsetIJK;
+            receiver.meta.ny = giver.meta.ny + multiplier*offsetXYZ;
+            break;
+
+        case 'z':
+            receiver.meta.k = giver.meta.k + multiplier*offsetIJK;
+            receiver.meta.nz = giver.meta.nz + multiplier*offsetXYZ;
+            break;
+    }
+};
+
+APP.prototype.loopFactor = function(dimension, direction) {
+
+    var variant, invariantOne, invariantTwo;
+    var first, second, third, fourth;
+    for (invariantOne=0; invariantOne<4; ++invariantOne) { for (invariantTwo=0; invariantTwo<4; ++invariantTwo) {
+
+        // FIRST TWO
+        for (variant=0; variant<4; ++variant) {
+            first = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
+            if (first !== undefined) break;
+        } if (first === undefined) continue;
+
+        for (variant=first.meta.i+1; variant<4; ++variant) {
+            second = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
+            if (second !== undefined) break;
+        }
+
+        if (second === undefined) {
+            this.setupTween(first.position, dimension, direction=='+' ? 0 : 3.3);
+            this.setMetaIJKGeneric(dimension, first, direction=='+' ? 0 : 3.3);
+            this.numberOfActiveTweens++;
+            continue;
+
+        } else if (second.meta.val === first.meta.val) {
+            this.setMetaIJKFromObject(dimension, second, first, direction, true);
+            second.meta.fused = true;
+            this.cubesToDelete.push(second);
+            this.cubesToDelete.push(first);
+            this.cubesToCreate.push(first.meta);
+            this.setupTween(second.position, dimension, first.meta.nx);
+        } else {
+            this.setMetaIJKFromObject(dimension, second, first, direction, true);
+            this.setupTween(second.position, dimension, first.meta.nx+1.1);
+        }
+        this.numberOfActiveTweens++;
+
+        // LAST TWO
+        for (variant=second.meta.i+1; variant<4; ++variant) {
+            third = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
+            if (third !== undefined) break;
+        } if (third === undefined) continue;
+
+        for (variant=third.meta.i+1; variant<4; ++variant) {
+            fourth = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
+            if (fourth !== undefined) break;
+        }
+
+        if (!second.meta.fused && second.meta.val == third.meta.val) {
+            this.setupTween(third.position, dimension, second.meta.nx);
+            this.setMetaIJKFromObject(dimension, third, second, direction, true);
+            third.meta.fused = true;
+        } else {
+            this.setupTween(third.position, dimension, second.meta.nx+1.1);
+            third.meta.i = second.meta.i+1;
+            third.meta.nx = second.meta.nx+1.1;
+        }
+        this.numberOfActiveTweens ++;
+
+        if (fourth !== undefined) {
+            if (!second.meta.fused && second.meta.val == third.meta.val) {
+                this.setupTween(third.position, dimension, second.meta.nx);
+                this.setMetaIJKFromObject(dimension, third, second, direction, true);
+
+                this.setupTween(fourth.position, dimension, third.meta.nx+1.1);
+                this.setMetaIJKFromObject(dimension, third, second, direction, false);
+
+                this.numberOfActiveTweens += 2;
+
+            } else {
+                if (!third.meta.fused && fourth.meta.val === third.meta.val) {
+                    this.setupTween(fourth.position, dimension, third.meta.nx);
+                    this.setMetaIJKFromObject(dimension, fourth, third, direction, true);
+                    this.cubesToDelete.push(fourth);
+                    this.cubesToDelete.push(third);
+                    this.cubesToCreate.push(fourth.meta);
+                } else {
+                    this.setupTween(fourth.position, dimension, third.meta.nx+1.1);
+                    this.setMetaIJKFromObject(dimension, fourth, third, direction, false);
+                }
+
+                this.numberOfActiveTweens ++;
+            }
+        }
+
+    }}
 };
 
 APP.prototype.updateModel = function (direction) {
@@ -126,154 +265,79 @@ APP.prototype.updateModel = function (direction) {
     this.cubesToDelete = [];
     this.cubesToCreate = [];
 
+    var x, y, z;
+    var first, second, third, fourth;
     switch(direction) {
         case 'left':
             // X : invariants : Y, Z
 
-            for (var y=0; y<4; ++y) { for (var z=0; z<4; ++z) {
-
-                // FIRST TWO
-                var first;
-                var x;
-                for (x=0; x<4; ++x) {
-                    first = this.getIJK(x, y, z);
-                    if (first !== undefined) break;
-                }
-                if (first === undefined) continue;
-
-                var second;
-                for (x=first.cubePosition.i+1; x<4; ++x) {
-                    second = this.getIJK(x, y, z);
-                    if (second !== undefined) break;
-                }
-                if (second === undefined) {
-                    this.setupTween(first.position, 'x', 0);
-                    first.cubePosition.i = 0;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                // Fusion
-                if (second.cubePosition.val === first.cubePosition.val) {
-                    this.cubesToDelete.push(second);
-                    this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.cubePosition);
-                    this.setupTween(second.position, 'x', first.position.x);
-                }
-
-                // Juxtaposition
-                else {
-                    this.setupTween(second.position, 'x', first.position.x+1.1);
-                    second.cubePosition.i = first.cubePosition.i+1;
-                }
-                this.numberOfActiveTweens ++;
-
-                // LAST TWO
-                var third;
-                for (x=second.cubePosition.i+1; x<4; ++x) {
-                    third = this.getIJK(x, y, z);
-                    if (third !== undefined) break;
-                }
-                if (third === undefined) continue;
-
-                var fourth;
-                for (x=third.cubePosition.i+1; x<4; ++x) {
-                    fourth = this.getIJK(x, y, z);
-                    if (fourth !== undefined) break;
-                }
-                if (fourth === undefined) {
-                    this.setupTween(third.position, 'x', second.position.x+1.1);
-                    third.cubePosition.i = second.cubePosition.i+1;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                // Fusion
-                if (fourth.cubePosition.val === third.cubePosition.val) {
-                    this.cubesToDelete.push(fourth);
-                    this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.cubePosition);
-                    this.setupTween(fourth.position, 'x', third.position.x);
-                }
-
-                // Juxtaposition
-                else {
-                    this.setupTween(fourth.position, 'x', third.position.x+1.1);
-                    fourth.cubePosition.i = third.cubePosition.i+1;
-                }
-                this.numberOfActiveTweens ++;
-
-            }}
+            this.loopFactor('x', '+');
 
             break;
 
         case 'right':
-            for (var y=0; y<4; ++y) { for (var z=0; z<4; ++z) {
+            for (y=0; y<4; ++y) { for (z=0; z<4; ++z) {
 
                 // FIRST TWO
-                var first;
-                var x;
                 for (x=3; x>=0; --x) {
                     first = this.getIJK(x, y, z);
                     if (first !== undefined) break;
                 }
                 if (first === undefined) continue;
 
-                var second;
-                for (x=first.cubePosition.i-1; x>=0; --x) {
+                for (x=first.meta.i-1; x>=0; --x) {
                     second = this.getIJK(x, y, z);
                     if (second !== undefined) break;
                 }
                 if (second === undefined) {
                     this.setupTween(first.position, 'x', 3.3);
-                    first.cubePosition.i = 3;
+                    first.meta.i = 3;
                     this.numberOfActiveTweens++;
                     continue;
                 }
 
-                if (second.cubePosition.val === first.cubePosition.val) {
+                if (second.meta.val === first.meta.val) {
                     this.cubesToDelete.push(second);
                     this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.cubePosition);
+                    this.cubesToCreate.push(first.meta);
                     this.setupTween(second.position, 'x', first.position.x);
+                    //TODO define that is a fusion.
                 } else {
                     this.setupTween(second.position, 'x', first.position.x-1.1);
-                    second.cubePosition.i = first.cubePosition.i-1;
+                    second.meta.i = first.meta.i-1;
                 }
                 this.numberOfActiveTweens ++;
 
                 // LAST TWO
-                var third;
-                for (x=second.cubePosition.i-1; x>=0; --x) {
+                for (x=second.meta.i-1; x>=0; --x) {
                     third = this.getIJK(x, y, z);
                     if (third !== undefined) break;
                 }
                 if (third === undefined) continue;
 
-                var fourth;
-                for (x=third.cubePosition.i-1; x>=0; --x) {
+                for (x=third.meta.i-1; x>=0; --x) {
                     fourth = this.getIJK(x, y, z);
                     if (fourth !== undefined) break;
                 }
                 if (fourth === undefined) {
                     this.setupTween(third.position, 'x', second.position.x-1.1);
-                    third.cubePosition.i = second.cubePosition.i-1;
+                    third.meta.i = second.meta.i-1;
                     this.numberOfActiveTweens ++;
                     continue;
                 }
 
                 // Fusion
-                if (fourth.cubePosition.val === third.cubePosition.val) {
+                if (fourth.meta.val === third.meta.val) {
                     this.cubesToDelete.push(fourth);
                     this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.cubePosition);
+                    this.cubesToCreate.push(third.meta);
                     this.setupTween(fourth.position, 'x', third.position.x);
                 }
 
                 // Juxtaposition
                 else {
                     this.setupTween(fourth.position, 'x', third.position.x-1.1);
-                    fourth.cubePosition.i = third.cubePosition.i-1;
+                    fourth.meta.i = third.meta.i-1;
                 }
                 this.numberOfActiveTweens ++;
 
@@ -285,65 +349,60 @@ APP.prototype.updateModel = function (direction) {
         case 'down':
             // Y : invariants : X, Z
 
-            for (var x=0; x<4; ++x) { for (var z=0; z<4; ++z) {
-                var first;
-                var y;
+            for (x=0; x<4; ++x) { for (z=0; z<4; ++z) {
                 for (y=0; y<4; ++y) {
                     first = this.getIJK(x, y, z);
                     if (first !== undefined) break;
                 }
                 if (first === undefined) continue;
 
-                var second;
-                for (y=first.cubePosition.j+1; y<4; ++y) {
+                for (y=first.meta.j+1; y<4; ++y) {
                     second = this.getIJK(x, y, z);
                     if (second !== undefined) break;
                 }
                 if (second === undefined) {
                     this.setupTween(first.position, 'y', 0);
-                    first.cubePosition.j = 0;
+                    first.meta.j = 0;
                     this.numberOfActiveTweens ++;
                     continue;
                 }
 
-                if (second.cubePosition.val === first.cubePosition.val) {
+                if (second.meta.val === first.meta.val) {
                     this.cubesToDelete.push(second);
                     this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.cubePosition);
+                    this.cubesToCreate.push(first.meta);
                     this.setupTween(second.position, 'y', first.position.y);
                 } else {
                     this.setupTween(second.position, 'y', first.position.y+1.1);
-                    second.cubePosition.j = first.cubePosition.j+1;
+                    second.meta.j = first.meta.j+1;
                 }
                 this.numberOfActiveTweens ++;
 
-                var third;
-                for (y=second.cubePosition.j+1; y<4; ++y) {
+                for (y=second.meta.j+1; y<4; ++y) {
                     third = this.getIJK(x, y, z);
                     if (third !== undefined) break;
                 }
                 if (third === undefined) continue;
 
-                var fourth;
-                for (y=third.cubePosition.j+1; y<4; ++y) {
+                for (y=third.meta.j+1; y<4; ++y) {
                     fourth = this.getIJK(x, y, z);
                     if (fourth !== undefined) break;
                 }
                 if (fourth === undefined) {
                     this.setupTween(third.position, 'y', second.position.y+1.1);
-                    third.cubePosition.j = second.cubePosition.j+1;
+                    third.meta.j = second.meta.j+1;
                     this.numberOfActiveTweens ++;
                     continue;
                 }
 
-                if (fourth.cubePosition.val === third.cubePosition.val) {
+                if (fourth.meta.val === third.meta.val) {
                     this.cubesToDelete.push(fourth);
                     this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.cubePosition);
+                    this.cubesToCreate.push(third.meta);
                     this.setupTween(fourth.position, 'y', third.position.y);
                 } else {
                     this.setupTween(fourth.position, 'y', third.position.y+1.1);
-                    fourth.cubePosition.j = third.cubePosition.j+1;
+                    fourth.meta.j = third.meta.j+1;
                 }
                 this.numberOfActiveTweens ++;
 
@@ -351,66 +410,60 @@ APP.prototype.updateModel = function (direction) {
             break;
 
         case 'up':
-            for (var x=0; x<4; ++x) { for (var z=0; z<4; ++z) {
-
-                var first;
-                var y;
+            for (x=0; x<4; ++x) { for (z=0; z<4; ++z) {
                 for (y=3; y>=0; --y) {
                     first = this.getIJK(x, y, z);
                     if (first !== undefined) break;
                 }
                 if (first === undefined) continue;
 
-                var second;
-                for (y=first.cubePosition.j-1; y>=0; --y) {
+                for (y=first.meta.j-1; y>=0; --y) {
                     second = this.getIJK(x, y, z);
                     if (second !== undefined) break;
                 }
                 if (second === undefined) {
                     this.setupTween(first.position, 'y', 3.3);
-                    first.cubePosition.j = 3;
+                    first.meta.j = 3;
                     this.numberOfActiveTweens++;
                     continue;
                 }
 
-                if (second.cubePosition.val === first.cubePosition.val) {
+                if (second.meta.val === first.meta.val) {
                     this.cubesToDelete.push(second);
                     this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.cubePosition);
+                    this.cubesToCreate.push(first.meta);
                     this.setupTween(second.position, 'y', first.position.y);
                 } else {
                     this.setupTween(second.position, 'y', first.position.y-1.1);
-                    second.cubePosition.j = first.cubePosition.j-1;
+                    second.meta.j = first.meta.j-1;
                 }
                 this.numberOfActiveTweens ++;
 
-                var third;
-                for (y=second.cubePosition.j-1; y>=0; --y) {
+                for (y=second.meta.j-1; y>=0; --y) {
                     third = this.getIJK(x, y, z);
                     if (third !== undefined) break;
                 }
                 if (third === undefined) continue;
 
-                var fourth;
-                for (y=third.cubePosition.j-1; y>=0; --y) {
+                for (y=third.meta.j-1; y>=0; --y) {
                     fourth = this.getIJK(x, y, z);
                     if (fourth !== undefined) break;
                 }
                 if (fourth === undefined) {
                     this.setupTween(third.position, 'y', second.position.y-1.1);
-                    third.cubePosition.j = second.cubePosition.j-1;
+                    third.meta.j = second.meta.j-1;
                     this.numberOfActiveTweens ++;
                     continue;
                 }
 
-                if (fourth.cubePosition.val === third.cubePosition.val) {
+                if (fourth.meta.val === third.meta.val) {
                     this.cubesToDelete.push(fourth);
                     this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.cubePosition);
+                    this.cubesToCreate.push(third.meta);
                     this.setupTween(fourth.position, 'y', third.position.y);
                 } else {
                     this.setupTween(fourth.position, 'y', third.position.y-1.1);
-                    fourth.cubePosition.j = third.cubePosition.j-1;
+                    fourth.meta.j = third.meta.j-1;
                 }
                 this.numberOfActiveTweens ++;
 
@@ -420,65 +473,60 @@ APP.prototype.updateModel = function (direction) {
 
         // Z : invariants : X, Y
         case 'in':
-            for (var x=0; x<4; ++x) { for (var y=0; y<4; ++y) {
-                var first;
-                var z;
+            for (x=0; x<4; ++x) { for (y=0; y<4; ++y) {
                 for (z=0; z<4; ++z) {
                     first = this.getIJK(x, y, z);
                     if (first !== undefined) break;
                 }
                 if (first === undefined) continue;
 
-                var second;
-                for (z=first.cubePosition.k+1; z<4; ++z) {
+                for (z=first.meta.k+1; z<4; ++z) {
                     second = this.getIJK(x, y, z);
                     if (second !== undefined) break;
                 }
                 if (second === undefined) {
                     this.setupTween(first.position, 'z', 0);
-                    first.cubePosition.k = 0;
+                    first.meta.k = 0;
                     this.numberOfActiveTweens ++;
                     continue;
                 }
 
-                if (second.cubePosition.val === first.cubePosition.val) {
+                if (second.meta.val === first.meta.val) {
                     this.cubesToDelete.push(second);
                     this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.cubePosition);
+                    this.cubesToCreate.push(first.meta);
                     this.setupTween(second.position, 'z', first.position.z);
                 } else {
                     this.setupTween(second.position, 'z', first.position.z+1.1);
-                    second.cubePosition.k = first.cubePosition.k+1;
+                    second.meta.k = first.meta.k+1;
                 }
                 this.numberOfActiveTweens ++;
 
-                var third;
-                for (z=second.cubePosition.k+1; z<4; ++z) {
+                for (z=second.meta.k+1; z<4; ++z) {
                     third = this.getIJK(x, y, z);
                     if (third !== undefined) break;
                 }
                 if (third === undefined) continue;
 
-                var fourth;
-                for (z=third.cubePosition.k+1; z<4; ++z) {
+                for (z=third.meta.k+1; z<4; ++z) {
                     fourth = this.getIJK(x, y, z);
                     if (fourth !== undefined) break;
                 }
                 if (fourth === undefined) {
                     this.setupTween(third.position, 'z', second.position.z+1.1);
-                    third.cubePosition.k = second.cubePosition.k+1;
+                    third.meta.k = second.meta.k+1;
                     this.numberOfActiveTweens ++;
                     continue;
                 }
 
-                if (fourth.cubePosition.val === third.cubePosition.val) {
+                if (fourth.meta.val === third.meta.val) {
                     this.cubesToDelete.push(fourth);
                     this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.cubePosition);
+                    this.cubesToCreate.push(third.meta);
                     this.setupTween(fourth.position, 'z', third.position.z);
                 } else {
                     this.setupTween(fourth.position, 'z', third.position.z+1.1);
-                    fourth.cubePosition.k = third.cubePosition.k+1;
+                    fourth.meta.k = third.meta.k+1;
                 }
                 this.numberOfActiveTweens ++;
 
@@ -487,66 +535,61 @@ APP.prototype.updateModel = function (direction) {
 
         case 'out':
             console.log("out1");
-            for (var x=0; x<4; ++x) { for (var y=0; y<4; ++y) {
+            for (x=0; x<4; ++x) { for (y=0; y<4; ++y) {
 
-                var first;
-                var z;
                 for (z=3; z>=0; --z) {
                     first = this.getIJK(x, y, z);
                     if (first !== undefined) break;
                 }
                 if (first === undefined) continue;
 
-                var second;
-                for (z=first.cubePosition.k-1; z>=0; --z) {
+                for (z=first.meta.k-1; z>=0; --z) {
                     second = this.getIJK(x, y, z);
                     if (second !== undefined) break;
                 }
                 if (second === undefined) {
                     this.setupTween(first.position, 'z', 3.3);
-                    first.cubePosition.k = 3;
+                    first.meta.k = 3;
                     this.numberOfActiveTweens++;
                     continue;
                 }
 
-                if (second.cubePosition.val === first.cubePosition.val) {
+                if (second.meta.val === first.meta.val) {
                     this.cubesToDelete.push(second);
                     this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.cubePosition);
+                    this.cubesToCreate.push(first.meta);
                     this.setupTween(second.position, 'z', first.position.z);
                 } else {
                     this.setupTween(second.position, 'z', first.position.z-1.1);
-                    second.cubePosition.k = first.cubePosition.k-1;
+                    second.meta.k = first.meta.k-1;
                 }
                 this.numberOfActiveTweens ++;
 
-                var third;
-                for (z=second.cubePosition.k-1; z>=0; --z) {
+                for (z=second.meta.k-1; z>=0; --z) {
                     third = this.getIJK(x, y, z);
                     if (third !== undefined) break;
                 }
                 if (third === undefined) continue;
 
-                var fourth;
-                for (z=third.cubePosition.k-1; z>=0; --z) {
+                for (z=third.meta.k-1; z>=0; --z) {
                     fourth = this.getIJK(x, y, z);
                     if (fourth !== undefined) break;
                 }
                 if (fourth === undefined) {
                     this.setupTween(third.position, 'z', second.position.z-1.1);
-                    third.cubePosition.k = second.cubePosition.k-1;
+                    third.meta.k = second.meta.k-1;
                     this.numberOfActiveTweens ++;
                     continue;
                 }
 
-                if (fourth.cubePosition.val === third.cubePosition.val) {
+                if (fourth.meta.val === third.meta.val) {
                     this.cubesToDelete.push(fourth);
                     this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.cubePosition);
+                    this.cubesToCreate.push(third.meta);
                     this.setupTween(fourth.position, 'z', third.position.z);
                 } else {
                     this.setupTween(fourth.position, 'z', third.position.z-1.1);
-                    fourth.cubePosition.k = third.cubePosition.k-1;
+                    fourth.meta.k = third.meta.k-1;
                 }
                 this.numberOfActiveTweens ++;
             }}
@@ -565,7 +608,7 @@ APP.prototype.getIJK = function(i, j, k) {
     var currentMesh;
     for (var meshId in this.meshes) {
         currentMesh = this.meshes[meshId];
-        if (currentMesh.cubePosition.i === i && currentMesh.cubePosition.j === j && currentMesh.cubePosition.k === k)
+        if (currentMesh.meta.i === i && currentMesh.meta.j === j && currentMesh.meta.k === k)
             return currentMesh;
     }
 
