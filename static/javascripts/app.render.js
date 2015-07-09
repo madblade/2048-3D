@@ -33,17 +33,15 @@ APP.prototype.setupTween = function(obj, prop, targetValue) {
         .onComplete(function() {
             this.numberOfActiveTweens --;
             if (this.numberOfActiveTweens == 0) {
-                console.log("aa");
                 this.deleteCubes(this.cubesToDelete);
                 this.createCubes(this.cubesToCreate);
-                console.log(this.meshes.length);
-
                 this.addNewElements();
                 this.defuse();
             }
             this.isTweening = false;
         }.bind(this));
 
+    this.numberOfActiveTweens ++;
     this.isTweening = true;
     tween.start();
 };

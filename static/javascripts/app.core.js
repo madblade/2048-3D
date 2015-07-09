@@ -173,6 +173,64 @@ APP.prototype.setMetaIJKFromObject = function(dimension, receiver, giver, direct
     }
 };
 
+APP.prototype.getCurrentMetaXYZ = function (dimension, object) {
+    switch (dimension) {
+        case 'x':
+            return object.meta.nx;
+            break;
+
+        case 'y':
+            return object.meta.ny;
+            break;
+
+        case 'z':
+            return object.meta.nz;
+            break;
+    }
+};
+
+APP.prototype.getNextMetaXYZ = function (dimension, direction, object) {
+    var multiplier = direction == '+' ? 1 : -1;
+    var offsetXYZ = 1.1*multiplier;
+    switch (dimension) {
+        case 'x':
+            return object.meta.nx + offsetXYZ;
+            break;
+
+        case 'y':
+            return object.meta.ny + offsetXYZ;
+            break;
+
+        case 'z':
+            return object.meta.nz + offsetXYZ;
+            break;
+    }
+};
+
+APP.prototype.initGen = function(dimension, direction, object) {
+    var factor = direction == '+' ? 1 : -1;
+    switch (dimension) {
+        case 'x': return object.meta.i + factor;
+
+        case 'y': return object.meta.j + factor;
+
+        case 'z': return object.meta.k + factor;
+    }
+};
+
+APP.prototype.stopGen = function(direction, value) {
+    switch (direction) {
+        case '+':
+            return value < 4;
+        case '-':
+            return value >= 0;
+    }
+};
+
+APP.prototype.applyGen = function (direction, value) {
+    return (direction == '+' ? value + 1 : value - 1);
+};
+
 APP.prototype.loopFactor = function(dimension, direction) {
 
     var variant, invariantOne, invariantTwo;
@@ -180,20 +238,19 @@ APP.prototype.loopFactor = function(dimension, direction) {
     for (invariantOne=0; invariantOne<4; ++invariantOne) { for (invariantTwo=0; invariantTwo<4; ++invariantTwo) {
 
         // FIRST TWO
-        for (variant=0; variant<4; ++variant) {
+        for (variant = (direction=='+'?0:4); this.stopGen(direction, variant); variant = this.applyGen(direction, variant)) {
             first = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
             if (first !== undefined) break;
         } if (first === undefined) continue;
 
-        for (variant=first.meta.i+1; variant<4; ++variant) {
+        for (variant=this.initGen(dimension, direction, first); this.stopGen(direction, variant); variant = this.applyGen(direction, variant)) {
             second = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
             if (second !== undefined) break;
         }
 
         if (second === undefined) {
             this.setupTween(first.position, dimension, direction=='+' ? 0 : 3.3);
-            this.setMetaIJKGeneric(dimension, first, direction=='+' ? 0 : 3.3);
-            this.numberOfActiveTweens++;
+            this.setMetaIJKGeneric(dimension, first, direction=='+' ? 0 : 3);
             continue;
 
         } else if (second.meta.val === first.meta.val) {
@@ -202,58 +259,51 @@ APP.prototype.loopFactor = function(dimension, direction) {
             this.cubesToDelete.push(second);
             this.cubesToDelete.push(first);
             this.cubesToCreate.push(first.meta);
-            this.setupTween(second.position, dimension, first.meta.nx);
+            this.setupTween(second.position, dimension, this.getCurrentMetaXYZ(dimension, first));
         } else {
             this.setMetaIJKFromObject(dimension, second, first, direction, true);
-            this.setupTween(second.position, dimension, first.meta.nx+1.1);
+            this.setupTween(second.position, dimension, this.getNextMetaXYZ(dimension, direction, first));
         }
-        this.numberOfActiveTweens++;
 
         // LAST TWO
-        for (variant=second.meta.i+1; variant<4; ++variant) {
+        for (variant=this.initGen(dimension, direction, second); this.stopGen(direction, variant); variant = this.applyGen(direction, variant)) {
             third = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
             if (third !== undefined) break;
         } if (third === undefined) continue;
 
-        for (variant=third.meta.i+1; variant<4; ++variant) {
+        for (variant=this.initGen(dimension, direction, third); this.stopGen(direction, variant); variant = this.applyGen(direction, variant)) {
             fourth = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
             if (fourth !== undefined) break;
         }
 
         if (!second.meta.fused && second.meta.val == third.meta.val) {
-            this.setupTween(third.position, dimension, second.meta.nx);
+            this.setupTween(third.position, dimension, this.getCurrentMetaXYZ(dimension, second));
             this.setMetaIJKFromObject(dimension, third, second, direction, true);
             third.meta.fused = true;
         } else {
-            this.setupTween(third.position, dimension, second.meta.nx+1.1);
-            third.meta.i = second.meta.i+1;
-            third.meta.nx = second.meta.nx+1.1;
+            this.setupTween(third.position, dimension, this.getNextMetaXYZ(dimension, direction, second));
+            this.setMetaIJKFromObject(dimension, third, second, direction, false);
         }
-        this.numberOfActiveTweens ++;
 
         if (fourth !== undefined) {
             if (!second.meta.fused && second.meta.val == third.meta.val) {
-                this.setupTween(third.position, dimension, second.meta.nx);
+                this.setupTween(third.position, dimension, this.getCurrentMetaXYZ(dimension, second));
                 this.setMetaIJKFromObject(dimension, third, second, direction, true);
 
-                this.setupTween(fourth.position, dimension, third.meta.nx+1.1);
+                this.setupTween(fourth.position, dimension, this.getNextMetaXYZ(dimension, direction, third));
                 this.setMetaIJKFromObject(dimension, third, second, direction, false);
-
-                this.numberOfActiveTweens += 2;
 
             } else {
                 if (!third.meta.fused && fourth.meta.val === third.meta.val) {
-                    this.setupTween(fourth.position, dimension, third.meta.nx);
+                    this.setupTween(fourth.position, dimension, this.getCurrentMetaXYZ(dimension, third));
                     this.setMetaIJKFromObject(dimension, fourth, third, direction, true);
                     this.cubesToDelete.push(fourth);
                     this.cubesToDelete.push(third);
                     this.cubesToCreate.push(fourth.meta);
                 } else {
-                    this.setupTween(fourth.position, dimension, third.meta.nx+1.1);
+                    this.setupTween(fourth.position, dimension, this.getNextMetaXYZ(dimension, direction, third));
                     this.setMetaIJKFromObject(dimension, fourth, third, direction, false);
                 }
-
-                this.numberOfActiveTweens ++;
             }
         }
 
@@ -265,337 +315,32 @@ APP.prototype.updateModel = function (direction) {
     this.cubesToDelete = [];
     this.cubesToCreate = [];
 
-    var x, y, z;
-    var first, second, third, fourth;
     switch(direction) {
         case 'left':
-            // X : invariants : Y, Z
-
             this.loopFactor('x', '+');
-
             break;
 
         case 'right':
-            for (y=0; y<4; ++y) { for (z=0; z<4; ++z) {
-
-                // FIRST TWO
-                for (x=3; x>=0; --x) {
-                    first = this.getIJK(x, y, z);
-                    if (first !== undefined) break;
-                }
-                if (first === undefined) continue;
-
-                for (x=first.meta.i-1; x>=0; --x) {
-                    second = this.getIJK(x, y, z);
-                    if (second !== undefined) break;
-                }
-                if (second === undefined) {
-                    this.setupTween(first.position, 'x', 3.3);
-                    first.meta.i = 3;
-                    this.numberOfActiveTweens++;
-                    continue;
-                }
-
-                if (second.meta.val === first.meta.val) {
-                    this.cubesToDelete.push(second);
-                    this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.meta);
-                    this.setupTween(second.position, 'x', first.position.x);
-                    //TODO define that is a fusion.
-                } else {
-                    this.setupTween(second.position, 'x', first.position.x-1.1);
-                    second.meta.i = first.meta.i-1;
-                }
-                this.numberOfActiveTweens ++;
-
-                // LAST TWO
-                for (x=second.meta.i-1; x>=0; --x) {
-                    third = this.getIJK(x, y, z);
-                    if (third !== undefined) break;
-                }
-                if (third === undefined) continue;
-
-                for (x=third.meta.i-1; x>=0; --x) {
-                    fourth = this.getIJK(x, y, z);
-                    if (fourth !== undefined) break;
-                }
-                if (fourth === undefined) {
-                    this.setupTween(third.position, 'x', second.position.x-1.1);
-                    third.meta.i = second.meta.i-1;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                // Fusion
-                if (fourth.meta.val === third.meta.val) {
-                    this.cubesToDelete.push(fourth);
-                    this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.meta);
-                    this.setupTween(fourth.position, 'x', third.position.x);
-                }
-
-                // Juxtaposition
-                else {
-                    this.setupTween(fourth.position, 'x', third.position.x-1.1);
-                    fourth.meta.i = third.meta.i-1;
-                }
-                this.numberOfActiveTweens ++;
-
-            }}
-
+            this.loopFactor('x', '-');
             break;
 
-        /////////////////////////////////////////////////////////////////////////
+
         case 'down':
-            // Y : invariants : X, Z
-
-            for (x=0; x<4; ++x) { for (z=0; z<4; ++z) {
-                for (y=0; y<4; ++y) {
-                    first = this.getIJK(x, y, z);
-                    if (first !== undefined) break;
-                }
-                if (first === undefined) continue;
-
-                for (y=first.meta.j+1; y<4; ++y) {
-                    second = this.getIJK(x, y, z);
-                    if (second !== undefined) break;
-                }
-                if (second === undefined) {
-                    this.setupTween(first.position, 'y', 0);
-                    first.meta.j = 0;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                if (second.meta.val === first.meta.val) {
-                    this.cubesToDelete.push(second);
-                    this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.meta);
-                    this.setupTween(second.position, 'y', first.position.y);
-                } else {
-                    this.setupTween(second.position, 'y', first.position.y+1.1);
-                    second.meta.j = first.meta.j+1;
-                }
-                this.numberOfActiveTweens ++;
-
-                for (y=second.meta.j+1; y<4; ++y) {
-                    third = this.getIJK(x, y, z);
-                    if (third !== undefined) break;
-                }
-                if (third === undefined) continue;
-
-                for (y=third.meta.j+1; y<4; ++y) {
-                    fourth = this.getIJK(x, y, z);
-                    if (fourth !== undefined) break;
-                }
-                if (fourth === undefined) {
-                    this.setupTween(third.position, 'y', second.position.y+1.1);
-                    third.meta.j = second.meta.j+1;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                if (fourth.meta.val === third.meta.val) {
-                    this.cubesToDelete.push(fourth);
-                    this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.meta);
-                    this.setupTween(fourth.position, 'y', third.position.y);
-                } else {
-                    this.setupTween(fourth.position, 'y', third.position.y+1.1);
-                    fourth.meta.j = third.meta.j+1;
-                }
-                this.numberOfActiveTweens ++;
-
-            }}
+            this.loopFactor('y', '+');
             break;
 
         case 'up':
-            for (x=0; x<4; ++x) { for (z=0; z<4; ++z) {
-                for (y=3; y>=0; --y) {
-                    first = this.getIJK(x, y, z);
-                    if (first !== undefined) break;
-                }
-                if (first === undefined) continue;
-
-                for (y=first.meta.j-1; y>=0; --y) {
-                    second = this.getIJK(x, y, z);
-                    if (second !== undefined) break;
-                }
-                if (second === undefined) {
-                    this.setupTween(first.position, 'y', 3.3);
-                    first.meta.j = 3;
-                    this.numberOfActiveTweens++;
-                    continue;
-                }
-
-                if (second.meta.val === first.meta.val) {
-                    this.cubesToDelete.push(second);
-                    this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.meta);
-                    this.setupTween(second.position, 'y', first.position.y);
-                } else {
-                    this.setupTween(second.position, 'y', first.position.y-1.1);
-                    second.meta.j = first.meta.j-1;
-                }
-                this.numberOfActiveTweens ++;
-
-                for (y=second.meta.j-1; y>=0; --y) {
-                    third = this.getIJK(x, y, z);
-                    if (third !== undefined) break;
-                }
-                if (third === undefined) continue;
-
-                for (y=third.meta.j-1; y>=0; --y) {
-                    fourth = this.getIJK(x, y, z);
-                    if (fourth !== undefined) break;
-                }
-                if (fourth === undefined) {
-                    this.setupTween(third.position, 'y', second.position.y-1.1);
-                    third.meta.j = second.meta.j-1;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                if (fourth.meta.val === third.meta.val) {
-                    this.cubesToDelete.push(fourth);
-                    this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.meta);
-                    this.setupTween(fourth.position, 'y', third.position.y);
-                } else {
-                    this.setupTween(fourth.position, 'y', third.position.y-1.1);
-                    fourth.meta.j = third.meta.j-1;
-                }
-                this.numberOfActiveTweens ++;
-
-            }}
+            this.loopFactor('y', '-');
             break;
 
 
-        // Z : invariants : X, Y
         case 'in':
-            for (x=0; x<4; ++x) { for (y=0; y<4; ++y) {
-                for (z=0; z<4; ++z) {
-                    first = this.getIJK(x, y, z);
-                    if (first !== undefined) break;
-                }
-                if (first === undefined) continue;
-
-                for (z=first.meta.k+1; z<4; ++z) {
-                    second = this.getIJK(x, y, z);
-                    if (second !== undefined) break;
-                }
-                if (second === undefined) {
-                    this.setupTween(first.position, 'z', 0);
-                    first.meta.k = 0;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                if (second.meta.val === first.meta.val) {
-                    this.cubesToDelete.push(second);
-                    this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.meta);
-                    this.setupTween(second.position, 'z', first.position.z);
-                } else {
-                    this.setupTween(second.position, 'z', first.position.z+1.1);
-                    second.meta.k = first.meta.k+1;
-                }
-                this.numberOfActiveTweens ++;
-
-                for (z=second.meta.k+1; z<4; ++z) {
-                    third = this.getIJK(x, y, z);
-                    if (third !== undefined) break;
-                }
-                if (third === undefined) continue;
-
-                for (z=third.meta.k+1; z<4; ++z) {
-                    fourth = this.getIJK(x, y, z);
-                    if (fourth !== undefined) break;
-                }
-                if (fourth === undefined) {
-                    this.setupTween(third.position, 'z', second.position.z+1.1);
-                    third.meta.k = second.meta.k+1;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                if (fourth.meta.val === third.meta.val) {
-                    this.cubesToDelete.push(fourth);
-                    this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.meta);
-                    this.setupTween(fourth.position, 'z', third.position.z);
-                } else {
-                    this.setupTween(fourth.position, 'z', third.position.z+1.1);
-                    fourth.meta.k = third.meta.k+1;
-                }
-                this.numberOfActiveTweens ++;
-
-            }}
+            this.loopFactor('z', '+');
             break;
 
         case 'out':
-            console.log("out1");
-            for (x=0; x<4; ++x) { for (y=0; y<4; ++y) {
-
-                for (z=3; z>=0; --z) {
-                    first = this.getIJK(x, y, z);
-                    if (first !== undefined) break;
-                }
-                if (first === undefined) continue;
-
-                for (z=first.meta.k-1; z>=0; --z) {
-                    second = this.getIJK(x, y, z);
-                    if (second !== undefined) break;
-                }
-                if (second === undefined) {
-                    this.setupTween(first.position, 'z', 3.3);
-                    first.meta.k = 3;
-                    this.numberOfActiveTweens++;
-                    continue;
-                }
-
-                if (second.meta.val === first.meta.val) {
-                    this.cubesToDelete.push(second);
-                    this.cubesToDelete.push(first);
-                    this.cubesToCreate.push(first.meta);
-                    this.setupTween(second.position, 'z', first.position.z);
-                } else {
-                    this.setupTween(second.position, 'z', first.position.z-1.1);
-                    second.meta.k = first.meta.k-1;
-                }
-                this.numberOfActiveTweens ++;
-
-                for (z=second.meta.k-1; z>=0; --z) {
-                    third = this.getIJK(x, y, z);
-                    if (third !== undefined) break;
-                }
-                if (third === undefined) continue;
-
-                for (z=third.meta.k-1; z>=0; --z) {
-                    fourth = this.getIJK(x, y, z);
-                    if (fourth !== undefined) break;
-                }
-                if (fourth === undefined) {
-                    this.setupTween(third.position, 'z', second.position.z-1.1);
-                    third.meta.k = second.meta.k-1;
-                    this.numberOfActiveTweens ++;
-                    continue;
-                }
-
-                if (fourth.meta.val === third.meta.val) {
-                    this.cubesToDelete.push(fourth);
-                    this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(third.meta);
-                    this.setupTween(fourth.position, 'z', third.position.z);
-                } else {
-                    this.setupTween(fourth.position, 'z', third.position.z-1.1);
-                    fourth.meta.k = third.meta.k-1;
-                }
-                this.numberOfActiveTweens ++;
-            }}
-
+            this.loopFactor('z', '-');
             break;
-
 
         default:
             break;
