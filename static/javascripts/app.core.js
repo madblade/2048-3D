@@ -65,11 +65,15 @@ APP.prototype.run = function () {
     this.meshes = [];
 
     // Draw cubes
-    for (var z=0; z<4; z+=1)
-        for (var y=0; y<4; y+=1)
-            for (var x=0; x<4; x+=1)
-                this.addCube(x, y, z, /*Math.pow(2, i++)*/64)
+    for (var z=0; z<1; z+=1)
+        for (var y=0; y<1; y+=1)
+            for (var x=0; x<1; x+=1)
+                //this.addCube(x, y, z, /*Math.pow(2, i++)*/64)
+                {}
 
+    for (var i=0; i<10; ++i) {
+        this.addNewElement();
+    }
     // Draw bounding box
     this.addBoundingBox();
 };
@@ -248,11 +252,11 @@ APP.prototype.loopFactor = function(dimension, direction) {
             if (second !== undefined) break;
         }
 
-        if (second === undefined) {
-            this.setupTween(first.position, dimension, direction=='+' ? 0 : 3.3);
-            this.setMetaIJKGeneric(dimension, first, direction=='+' ? 0 : 3);
-            continue;
+        this.setupTween(first.position, dimension, direction=='+' ? 0 : 3.3);
+        this.setMetaIJKGeneric(dimension, first, direction=='+' ? 0 : 3);
 
+        if (second === undefined) {
+            continue;
         } else if (second.meta.val === first.meta.val) {
             this.setMetaIJKFromObject(dimension, second, first, direction, true);
             second.meta.fused = true;
@@ -261,8 +265,8 @@ APP.prototype.loopFactor = function(dimension, direction) {
             this.cubesToCreate.push(first.meta);
             this.setupTween(second.position, dimension, this.getCurrentMetaXYZ(dimension, first));
         } else {
-            this.setMetaIJKFromObject(dimension, second, first, direction, true);
             this.setupTween(second.position, dimension, this.getNextMetaXYZ(dimension, direction, first));
+            this.setMetaIJKFromObject(dimension, second, first, direction, false);
         }
 
         // LAST TWO
@@ -277,33 +281,27 @@ APP.prototype.loopFactor = function(dimension, direction) {
         }
 
         if (!second.meta.fused && second.meta.val == third.meta.val) {
-            this.setupTween(third.position, dimension, this.getCurrentMetaXYZ(dimension, second));
             this.setMetaIJKFromObject(dimension, third, second, direction, true);
             third.meta.fused = true;
+            this.cubesToDelete.push(third);
+            this.cubesToDelete.push(second);
+            this.cubesToCreate.push(second.meta);
+            this.setupTween(third.position, dimension, this.getCurrentMetaXYZ(dimension, second));
         } else {
             this.setupTween(third.position, dimension, this.getNextMetaXYZ(dimension, direction, second));
             this.setMetaIJKFromObject(dimension, third, second, direction, false);
         }
 
         if (fourth !== undefined) {
-            if (!second.meta.fused && second.meta.val == third.meta.val) {
-                this.setupTween(third.position, dimension, this.getCurrentMetaXYZ(dimension, second));
-                this.setMetaIJKFromObject(dimension, third, second, direction, true);
-
-                this.setupTween(fourth.position, dimension, this.getNextMetaXYZ(dimension, direction, third));
-                this.setMetaIJKFromObject(dimension, third, second, direction, false);
-
+            if (!third.meta.fused && fourth.meta.val === third.meta.val) {
+                this.setupTween(fourth.position, dimension, this.getCurrentMetaXYZ(dimension, third));
+                this.setMetaIJKFromObject(dimension, fourth, third, direction, true);
+                this.cubesToDelete.push(fourth);
+                this.cubesToDelete.push(third);
+                this.cubesToCreate.push(fourth.meta);
             } else {
-                if (!third.meta.fused && fourth.meta.val === third.meta.val) {
-                    this.setupTween(fourth.position, dimension, this.getCurrentMetaXYZ(dimension, third));
-                    this.setMetaIJKFromObject(dimension, fourth, third, direction, true);
-                    this.cubesToDelete.push(fourth);
-                    this.cubesToDelete.push(third);
-                    this.cubesToCreate.push(fourth.meta);
-                } else {
-                    this.setupTween(fourth.position, dimension, this.getNextMetaXYZ(dimension, direction, third));
-                    this.setMetaIJKFromObject(dimension, fourth, third, direction, false);
-                }
+                this.setupTween(fourth.position, dimension, this.getNextMetaXYZ(dimension, direction, third));
+                this.setMetaIJKFromObject(dimension, fourth, third, direction, false);
             }
         }
 
@@ -346,6 +344,7 @@ APP.prototype.updateModel = function (direction) {
             break;
     }
 
+    this.defuse();
     this.isUpdating = false;
 };
 

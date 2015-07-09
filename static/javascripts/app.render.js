@@ -35,8 +35,8 @@ APP.prototype.setupTween = function(obj, prop, targetValue) {
             if (this.numberOfActiveTweens == 0) {
                 this.deleteCubes(this.cubesToDelete);
                 this.createCubes(this.cubesToCreate);
-                this.addNewElements();
-                this.defuse();
+                //this.addNewElement();
+                //this.addNewElement();
             }
             this.isTweening = false;
         }.bind(this));
@@ -72,11 +72,11 @@ APP.prototype.createCubes = function(cubes) {
     var currentCube;
     for (var cubeId in cubes) {
         currentCube = cubes[cubeId];
-        this.addCube(currentCube.i, currentCube.j, currentCube.k, Math.pow(currentCube.val, 2));
+        this.addCube(currentCube.i, currentCube.j, currentCube.k, currentCube.val*currentCube.val); // TODO **2
     }
 };
 
-APP.prototype.addNewElements = function() {
+APP.prototype.addNewElement = function() {
     var i = Math.floor(Math.random()*4);
     var j = Math.floor(Math.random()*4);
     var k = Math.floor(Math.random()*4);
@@ -92,7 +92,7 @@ APP.prototype.addNewElements = function() {
     if (currentTry > 9000) {
         console.log("Loser.");
     } else {
-        //this.addCube(i, j, k, 2);
+        this.addCube(i, j, k, 64);
     }
 };
 
