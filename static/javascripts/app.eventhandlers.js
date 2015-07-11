@@ -9,7 +9,6 @@ APP.prototype.onWindowResize = function () {
 };
 
 APP.prototype.handlerMouseDown = function (event) {
-    // this.simpleClick = true;
 };
 
 APP.prototype.handlerMouseMove = function () {

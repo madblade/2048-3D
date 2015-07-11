@@ -27,13 +27,6 @@ APP = function () {
     this.windowHalfX = window.innerWidth / 2;
     this.windowHalfY = window.innerHeight / 2;
 
-    // Set up clock
-    this.clock = new THREE.Clock();
-
-    // Set up stats
-    this.stats = this.getStats();
-    this.container.appendChild(this.stats.domElement);
-
     // Set up light
     this.light = new THREE.PointLight( 0xffffff );
     this.light.position.set(this.camera.position.x+5, this.camera.position.y+5, this.camera.position.z);
@@ -68,8 +61,9 @@ APP.prototype.run = function () {
     for (var z=0; z<1; z+=1)
         for (var y=0; y<1; y+=1)
             for (var x=0; x<1; x+=1)
-                //this.addCube(x, y, z, /*Math.pow(2, i++)*/64)
-                {}
+                {
+                    //this.addCube(x, y, z, /*Math.pow(2, i++)*/64)
+                }
 
     for (var i=0; i<10; ++i) {
         this.addNewElement();
@@ -79,10 +73,10 @@ APP.prototype.run = function () {
 };
 
 APP.prototype.addBoundingBox = function() {
-    var material = new THREE.LineBasicMaterial({color: 0x0000ff});
+    var material = new THREE.LineBasicMaterial({color: 0x000000});
     var geometry = new THREE.Geometry();
-    var min = -.1-.5;
-    var max = 4.4-.5;
+    var min = -.6;
+    var max = 3.9;
     geometry.vertices.push(new THREE.Vector3(min, min, min));
     geometry.vertices.push(new THREE.Vector3(min, min, max));
     geometry.vertices.push(new THREE.Vector3(min, max, max));
@@ -108,7 +102,7 @@ APP.prototype.addBoundingBox = function() {
 };
 
 APP.prototype.addCube = function (i, j, k, value) {
-    var normalized = 2*Math.log(value)/(64*Math.log(2));
+    var normalized = 2 * Math.log(value)/(10*Math.log(2));
 
     var b = Math.max(0, 255 * (1 - normalized))/256;
     var r = Math.max(0, 255 * (normalized - 1))/256;

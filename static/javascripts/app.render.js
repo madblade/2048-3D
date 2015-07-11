@@ -4,7 +4,6 @@
  * Render scene with camera pov
  */
 APP.prototype.render = function () {
-    var delta = this.clock.getDelta();
     this.renderer.render(this.scene, this.camera);
 };
 
@@ -14,7 +13,6 @@ APP.prototype.render = function () {
 APP.prototype.animate = function () {
     requestAnimationFrame(this.animate.bind(this));
     this.render();
-    this.stats.update();
     this.controls.update();
     TWEEN.update();
 };
@@ -35,7 +33,7 @@ APP.prototype.setupTween = function(obj, prop, targetValue) {
             if (this.numberOfActiveTweens == 0) {
                 this.deleteCubes(this.cubesToDelete);
                 this.createCubes(this.cubesToCreate);
-                //this.addNewElement();
+                this.addNewElement();
                 this.addNewElement();
                 this.isTweening = false;
             }
@@ -72,7 +70,7 @@ APP.prototype.createCubes = function(cubes) {
     var currentCube;
     for (var cubeId in cubes) {
         currentCube = cubes[cubeId];
-        this.addCube(currentCube.i, currentCube.j, currentCube.k, currentCube.val*currentCube.val); // TODO **2
+        this.addCube(currentCube.i, currentCube.j, currentCube.k, currentCube.val*2);
     }
 };
 
@@ -92,7 +90,7 @@ APP.prototype.addNewElement = function() {
     if (currentTry > 9000) {
         console.log("Loser.");
     } else {
-        this.addCube(i, j, k, 64);
+        this.addCube(i, j, k, 2);
     }
 };
 
