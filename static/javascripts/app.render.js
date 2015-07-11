@@ -18,6 +18,11 @@ APP.prototype.animate = function () {
 };
 
 APP.prototype.setupTween = function(obj, prop, targetValue) {
+    if (obj[prop] !== targetValue) this.someOneHasMoved = true;
+    this.setupTweenAdaptee(obj, prop, targetValue);
+};
+
+APP.prototype.setupTweenAdaptee = function(obj, prop, targetValue) {
     var update = function () {
         obj[prop] = current.property;
     };
@@ -33,9 +38,9 @@ APP.prototype.setupTween = function(obj, prop, targetValue) {
             if (this.numberOfActiveTweens == 0) {
                 this.deleteCubes(this.cubesToDelete);
                 this.createCubes(this.cubesToCreate);
-                this.addNewElement();
-                this.addNewElement();
+                if (this.someOneHasMoved) this.addNewElement();
                 this.isTweening = false;
+                this.someOneHasMoved = false;
             }
         }.bind(this));
 
@@ -79,7 +84,7 @@ APP.prototype.addNewElement = function() {
     var j = Math.floor(Math.random()*4);
     var k = Math.floor(Math.random()*4);
     var currentTry=0;
-    var maxTries = 10000;
+    var maxTries = 1000;
     while (this.isNotValid(i, j, k) && currentTry < maxTries) {
         i = Math.floor(Math.random()*4);
         j = Math.floor(Math.random()*4);
@@ -87,10 +92,10 @@ APP.prototype.addNewElement = function() {
         currentTry ++;
     }
 
-    if (currentTry > 9000) {
-        console.log("Loser.");
+    if (currentTry > 900) {
+        console.log("Seems bad.");
     } else {
-        this.addCube(i, j, k, 2);
+        this.addCube(i, j, k, Math.random() > 0.3 ? 2 : 4);
     }
 };
 

@@ -14,14 +14,14 @@ APP.prototype.getRenderer = function () {
 
 APP.prototype.getCamera = function () {
     var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
-    camera.position.set(3.3/2+6, 3.3/2+6, 0);
+    camera.position.set(3.3/2+1, 3.3/2+4, 3.3/2+6);
     return camera;
 };
 
 APP.prototype.getControls = function () {
     var controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
     controls.noKeys = true;
-    controls.target = new THREE.Vector3(3.3/2, 3.3/2, 3.3/2);
+    controls.target = new THREE.Vector3(1.65, 1.65, 1.65);
     return controls;
 };
 

@@ -48,6 +48,7 @@ APP = function () {
 
     this.isTweening = false;
     this.isUpdating = false;
+    this.someOneHasMoved = false;
     this.cubesToDelete = [];
     this.cubesToCreate = [];
     this.numberOfActiveTweens = 0;
@@ -58,14 +59,14 @@ APP.prototype.run = function () {
     this.meshes = [];
 
     // Draw cubes
-    for (var z=0; z<1; z+=1)
-        for (var y=0; y<1; y+=1)
-            for (var x=0; x<1; x+=1)
+    for (var z=0; z<4; z+=1)
+        for (var y=0; y<4; y+=1)
+            for (var x=0; x<4; x+=1)
                 {
-                    //this.addCube(x, y, z, /*Math.pow(2, i++)*/64)
+                    //this.addCube(x, y, z, /*Math.pow(2, i++)*/2)
                 }
 
-    for (var i=0; i<10; ++i) {
+    for (var i=0; i<3; ++i) {
         this.addNewElement();
     }
     // Draw bounding box

@@ -9,13 +9,58 @@ APP.prototype.onWindowResize = function () {
 };
 
 APP.prototype.handlerMouseDown = function (event) {
+    event.preventDefault();
 };
 
 APP.prototype.handlerMouseMove = function () {
     this.mouse.x = ( event.clientX - this.windowHalfX );
     this.mouse.y = ( event.clientY - this.windowHalfY );
 
-    this.light.position.set(this.camera.position.x+5, this.camera.position.y+5, this.camera.position.z);
+    var c = this.camera.position;
+    this.light.position.set(c.x+5, c.y+5, c.z);
+
+    var x = 1.65 - c.x,
+        y = 1.65 - c.y,
+        z = 1.65 - c.z;
+
+    if (z < 0 && Math.abs(z) > Math.abs(x)) {
+        this.keyEnum = {
+            LEFT: 37,
+            RIGHT: 39,
+            IN: 33,
+            OUT: 34,
+            UP: 38,
+            DOWN: 40
+        };
+    } else if (x < 0 && Math.abs(x) > Math.abs(z)) {
+        this.keyEnum = {
+            LEFT: 33,
+            RIGHT: 34,
+            IN: 39,
+            OUT: 37,
+            UP: 38,
+            DOWN: 40
+        };
+    } else if (z > 0 && Math.abs(z) > Math.abs(x)) {
+        this.keyEnum = {
+            LEFT: 39,
+            RIGHT: 37,
+            IN: 34,
+            OUT: 33,
+            UP: 38,
+            DOWN: 40
+        };
+    } else if (x > 0 && Math.abs(x) > Math.abs(z)) {
+        this.keyEnum = {
+            LEFT: 34,
+            RIGHT: 33,
+            IN: 37,
+            OUT: 39,
+            UP: 38,
+            DOWN: 40
+        };
+    }
+
 };
 
 APP.prototype.handlerMouseUp = function (event) {
@@ -27,24 +72,24 @@ APP.prototype.handlerKeyUp = function (event) {
     if (this.isTweening || this.isUpdating) return;
 
     switch (event.keyCode) {
-        case 37: // LEFT
+        case this.keyEnum.LEFT:
             this.updateModel('left');
             break;
-        case 39: // RIGHT
+        case this.keyEnum.RIGHT:
             this.updateModel('right');
             break;
 
-        case 38: // UP
+        case this.keyEnum.UP:
             this.updateModel('up');
             break;
-        case 40: // DOWN
+        case this.keyEnum.DOWN:
             this.updateModel('down');
             break;
 
-        case 33: // IN
+        case this.keyEnum.IN:
             this.updateModel('in');
             break;
-        case 34: // OUT
+        case this.keyEnum.OUT:
             this.updateModel('out');
             break;
     }
@@ -52,4 +97,15 @@ APP.prototype.handlerKeyUp = function (event) {
 
 APP.prototype.handlerKeyDown = function (event) {
     event.preventDefault();
+};
+
+APP.prototype.keyEnum = {
+    LEFT: 37,
+    RIGHT: 39,
+
+    UP: 38,
+    DOWN: 40,
+
+    IN: 33,
+    OUT: 34
 };
