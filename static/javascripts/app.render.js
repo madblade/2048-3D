@@ -36,9 +36,9 @@ APP.prototype.setupTween = function(obj, prop, targetValue) {
                 this.deleteCubes(this.cubesToDelete);
                 this.createCubes(this.cubesToCreate);
                 //this.addNewElement();
-                //this.addNewElement();
+                this.addNewElement();
+                this.isTweening = false;
             }
-            this.isTweening = false;
         }.bind(this));
 
     this.numberOfActiveTweens ++;

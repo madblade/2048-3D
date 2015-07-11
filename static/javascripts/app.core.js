@@ -225,7 +225,7 @@ APP.prototype.initGen = function(dimension, direction, object) {
 APP.prototype.stopGen = function(direction, value) {
     switch (direction) {
         case '+':
-            return value < 4;
+            return value <= 3;
         case '-':
             return value >= 0;
     }
@@ -247,17 +247,18 @@ APP.prototype.loopFactor = function(dimension, direction) {
             if (first !== undefined) break;
         } if (first === undefined) continue;
 
+        this.setMetaIJKGeneric(dimension, first, direction=='+' ? 0 : 3);
+        this.setupTween(first.position, dimension, direction=='+' ? 0 : 3.3);
+
         for (variant=this.initGen(dimension, direction, first); this.stopGen(direction, variant); variant = this.applyGen(direction, variant)) {
             second = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
             if (second !== undefined) break;
         }
 
-        this.setupTween(first.position, dimension, direction=='+' ? 0 : 3.3);
-        this.setMetaIJKGeneric(dimension, first, direction=='+' ? 0 : 3);
-
         if (second === undefined) {
             continue;
         } else if (second.meta.val === first.meta.val) {
+            //console.log("theres a second " + "(x=" + second.meta.i + ", y=" + second.meta.j + ", z=" + second.meta.k + ")");
             this.setMetaIJKFromObject(dimension, second, first, direction, true);
             second.meta.fused = true;
             this.cubesToDelete.push(second);
@@ -265,8 +266,8 @@ APP.prototype.loopFactor = function(dimension, direction) {
             this.cubesToCreate.push(first.meta);
             this.setupTween(second.position, dimension, this.getCurrentMetaXYZ(dimension, first));
         } else {
-            this.setupTween(second.position, dimension, this.getNextMetaXYZ(dimension, direction, first));
             this.setMetaIJKFromObject(dimension, second, first, direction, false);
+            this.setupTween(second.position, dimension, this.getNextMetaXYZ(dimension, direction, first));
         }
 
         // LAST TWO
@@ -275,12 +276,7 @@ APP.prototype.loopFactor = function(dimension, direction) {
             if (third !== undefined) break;
         } if (third === undefined) continue;
 
-        for (variant=this.initGen(dimension, direction, third); this.stopGen(direction, variant); variant = this.applyGen(direction, variant)) {
-            fourth = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
-            if (fourth !== undefined) break;
-        }
-
-        if (!second.meta.fused && second.meta.val == third.meta.val) {
+        if ((!second.meta.fused) && (second.meta.val == third.meta.val)) {
             this.setMetaIJKFromObject(dimension, third, second, direction, true);
             third.meta.fused = true;
             this.cubesToDelete.push(third);
@@ -288,24 +284,31 @@ APP.prototype.loopFactor = function(dimension, direction) {
             this.cubesToCreate.push(second.meta);
             this.setupTween(third.position, dimension, this.getCurrentMetaXYZ(dimension, second));
         } else {
-            this.setupTween(third.position, dimension, this.getNextMetaXYZ(dimension, direction, second));
             this.setMetaIJKFromObject(dimension, third, second, direction, false);
+            this.setupTween(third.position, dimension, this.getNextMetaXYZ(dimension, direction, second));
+        }
+
+        for (variant=this.initGen(dimension, direction, third); this.stopGen(direction, variant); variant = this.applyGen(direction, variant)) {
+            fourth = this.getIJKGeneric(dimension, variant, invariantOne, invariantTwo);
+            if (fourth !== undefined) break;
         }
 
         if (fourth !== undefined) {
-            if (!third.meta.fused && fourth.meta.val === third.meta.val) {
-                this.setupTween(fourth.position, dimension, this.getCurrentMetaXYZ(dimension, third));
+            if ((!third.meta.fused) && (fourth.meta.val === third.meta.val)) {
                 this.setMetaIJKFromObject(dimension, fourth, third, direction, true);
                 this.cubesToDelete.push(fourth);
                 this.cubesToDelete.push(third);
                 this.cubesToCreate.push(fourth.meta);
+                this.setupTween(fourth.position, dimension, this.getCurrentMetaXYZ(dimension, third));
             } else {
-                this.setupTween(fourth.position, dimension, this.getNextMetaXYZ(dimension, direction, third));
                 this.setMetaIJKFromObject(dimension, fourth, third, direction, false);
+                this.setupTween(fourth.position, dimension, this.getNextMetaXYZ(dimension, direction, third));
             }
         }
 
     }}
+
+    this.defuse();
 };
 
 APP.prototype.updateModel = function (direction) {
@@ -344,7 +347,6 @@ APP.prototype.updateModel = function (direction) {
             break;
     }
 
-    this.defuse();
     this.isUpdating = false;
 };
 
