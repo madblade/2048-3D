@@ -60,6 +60,7 @@ APP.prototype.nextId = function () {
 };
 
 APP.prototype.addCube = function (i, j, k, value) {
+    // TODO define other colors
     var normalized = 2 * Math.log(value)/(10*Math.log(2));
 
     var b = Math.max(0, 255 * (1 - normalized))/256;
@@ -72,19 +73,24 @@ APP.prototype.addCube = function (i, j, k, value) {
     var texture = new THREE.Texture(canvas);
     canvas.height = 256;
     canvas.width = 256;
+
     var context = canvas.getContext("2d");
     context.fillStyle = '#' + color.getHexString();
     context.fillRect(0, 0, 256, 256);
-    context.fillStyle = '#dddddd';
-    context.font = "40pt Verdana";
-    var textSize = context.measureText("" + value);
-    context.fillText(value, (canvas.width-textSize.width)/2, (canvas.height+5)/2);
+    //context.fillStyle = value == 32 ? '#000000' : '#dddddd';
+    //context.font = "40pt Verdana bold";
+    //var textSize = context.measureText("" + value);
+    //context.fillText(value, (canvas.width-textSize.width)/2, (canvas.height+20)/2);
     texture.needsUpdate = true;
+    
+    var modifier = new THREE.SubdivisionModifier(3);
+    var geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2);
+    geometry.mergeVertices();
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+    modifier.modify( geometry );
 
-    var material = new THREE.MeshBasicMaterial({
-        map : texture
-    });
-    var geometry = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
+    var material = new THREE.MeshLambertMaterial({map : texture});
     var mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(i*1.1, j*1.1, k*1.1);
     mesh.meta = {i:i, j:j, k:k, val:value, nx:i*1.1, ny:j*1.1, nz:k*1.1, fused: false};
