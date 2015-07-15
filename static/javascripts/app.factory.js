@@ -77,18 +77,24 @@ APP.prototype.addCube = function (i, j, k, value) {
     var context = canvas.getContext("2d");
     context.fillStyle = '#' + color.getHexString();
     context.fillRect(0, 0, 256, 256);
-    //context.fillStyle = value == 32 ? '#000000' : '#dddddd';
-    //context.font = "40pt Verdana bold";
-    //var textSize = context.measureText("" + value);
-    //context.fillText(value, (canvas.width-textSize.width)/2, (canvas.height+20)/2);
+    context.fillStyle = value == 32 ? '#000000' : '#dddddd';
+    context.font = "40pt Verdana bold";
+    var textSize = context.measureText("" + value);
+    context.fillText(value, (canvas.width-textSize.width)/2, (canvas.height+20)/2);
     texture.needsUpdate = true;
-    
+
     var modifier = new THREE.SubdivisionModifier(3);
     var geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2);
     geometry.mergeVertices();
+    geometry.computeCentroids();
     geometry.computeFaceNormals();
     geometry.computeVertexNormals();
     modifier.modify( geometry );
+/*
+   geometry.faceVertexUvs[0] = [];
+   for (var x=0; x<geometry.vertices.length; ++x) {
+       geometry.faceVertexUvs[0][x] = new THREE.Vector2(1./(x+1.));
+   }*/
 
     var material = new THREE.MeshLambertMaterial({map : texture});
     var mesh = new THREE.Mesh(geometry, material);
