@@ -12,12 +12,11 @@ APP.prototype.handlerMouseDown = function (event) {
     event.preventDefault();
 };
 
-APP.prototype.handlerMouseWheel = function(event) {
+APP.prototype.handlerMouseWheel = function (event) {
     event.preventDefault();
 
-    console.log("coucou");
     var c = this.camera.position;
-    this.light.position.set(c.x+5, c.y+5, c.z);
+    this.light.position.set(c.x + 5, c.y + 5, c.z);
 };
 
 APP.prototype.handlerMouseMove = function () {
@@ -25,48 +24,102 @@ APP.prototype.handlerMouseMove = function () {
     this.mouse.y = ( event.clientY - this.windowHalfY );
 
     var c = this.camera.position;
-    this.light.position.set(c.x+5, c.y+5, c.z);
+    this.light.position.set(c.x + 5, c.y + 5, c.z);
 
     var x = 1.65 - c.x,
         y = 1.65 - c.y,
         z = 1.65 - c.z;
 
     if (z < 0 && Math.abs(z) > Math.abs(x)) {
-        this.keyEnum = {
-            LEFT: 37,
-            RIGHT: 39,
-            IN: 33,
-            OUT: 34,
-            UP: 38,
-            DOWN: 40
-        };
+        // Right hand
+        this.keyEnum.LEFT = 37;
+        this.keyEnum.RIGHT = 39;
+        this.keyEnum.IN = 33;
+        this.keyEnum.OUT = 34;
+
+        // Left hand
+        if (this.language == "fr") {
+            this.leftHandKeyEnum.LEFT = this.keyEnum.Q;
+            this.leftHandKeyEnum.RIGHT = this.keyEnum.D;
+            this.leftHandKeyEnum.WITHIN = this.keyEnum.E;
+            this.leftHandKeyEnum.WITHOUT = this.keyEnum.C;
+            this.leftHandKeyEnum.FORWARD = this.keyEnum.Z;
+            this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        } else {
+            this.leftHandKeyEnum.LEFT = this.keyEnum.A;
+            this.leftHandKeyEnum.RIGHT = this.keyEnum.D;
+            this.leftHandKeyEnum.WITHIN = this.keyEnum.E;
+            this.leftHandKeyEnum.WITHOUT = this.keyEnum.C;
+            this.leftHandKeyEnum.FORWARD = this.keyEnum.W;
+            this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        }
+
     } else if (x < 0 && Math.abs(x) > Math.abs(z)) {
-        this.keyEnum = {
-            LEFT: 33,
-            RIGHT: 34,
-            IN: 39,
-            OUT: 37,
-            UP: 38,
-            DOWN: 40
-        };
+
+        this.keyEnum.LEFT = 33;
+        this.keyEnum.RIGHT = 34;
+        this.keyEnum.IN = 39;
+        this.keyEnum.OUT = 37;
+
+        if (this.language == "fr") {
+            this.leftHandKeyEnum.LEFT = this.keyEnum.E;
+            this.leftHandKeyEnum.RIGHT = this.keyEnum.C;
+            this.leftHandKeyEnum.WITHIN = this.keyEnum.D;
+            this.leftHandKeyEnum.WITHOUT = this.keyEnum.Q;
+            this.leftHandKeyEnum.FORWARD = this.keyEnum.Z;
+            this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        } else {
+            this.leftHandKeyEnum.LEFT = this.keyEnum.E;
+            this.leftHandKeyEnum.RIGHT = this.keyEnum.C;
+            this.leftHandKeyEnum.WITHIN = this.keyEnum.D;
+            this.leftHandKeyEnum.WITHOUT = this.keyEnum.A;
+            this.leftHandKeyEnum.FORWARD = this.keyEnum.W;
+            this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        }
     } else if (z > 0 && Math.abs(z) > Math.abs(x)) {
-        this.keyEnum = {
-            LEFT: 39,
-            RIGHT: 37,
-            IN: 34,
-            OUT: 33,
-            UP: 38,
-            DOWN: 40
-        };
+
+        this.keyEnum.LEFT = 39;
+        this.keyEnum.RIGHT = 37;
+        this.keyEnum.IN = 34;
+        this.keyEnum.OUT = 33;
+
+        if (this.language == "fr") {
+            this.leftHandKeyEnum.LEFT = this.keyEnum.D;
+            this.leftHandKeyEnum.RIGHT = this.keyEnum.Q;
+            this.leftHandKeyEnum.WITHIN = this.keyEnum.C;
+            this.leftHandKeyEnum.WITHOUT = this.keyEnum.E;
+            this.leftHandKeyEnum.FORWARD = this.keyEnum.Z;
+            this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        } else {
+            this.leftHandKeyEnum.LEFT = this.keyEnum.D;
+            this.leftHandKeyEnum.RIGHT = this.keyEnum.A;
+            this.leftHandKeyEnum.WITHIN = this.keyEnum.C;
+            this.leftHandKeyEnum.WITHOUT = this.keyEnum.E;
+            this.leftHandKeyEnum.FORWARD = this.keyEnum.W;
+            this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        }
+
     } else if (x > 0 && Math.abs(x) > Math.abs(z)) {
-        this.keyEnum = {
-            LEFT: 34,
-            RIGHT: 33,
-            IN: 37,
-            OUT: 39,
-            UP: 38,
-            DOWN: 40
-        };
+        this.keyEnum.LEFT = 34;
+        this.keyEnum.RIGHT = 33;
+        this.keyEnum.IN = 37;
+        this.keyEnum.OUT = 39;
+
+        if (this.language == "fr") {
+            this.leftHandKeyEnum.LEFT = this.keyEnum.C;
+            this.leftHandKeyEnum.RIGHT = this.keyEnum.E;
+            this.leftHandKeyEnum.WITHIN = this.keyEnum.Q;
+            this.leftHandKeyEnum.WITHOUT = this.keyEnum.D;
+            this.leftHandKeyEnum.FORWARD = this.keyEnum.Z;
+            this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        } else {
+            this.leftHandKeyEnum.LEFT = this.keyEnum.C;
+            this.leftHandKeyEnum.RIGHT = this.keyEnum.E;
+            this.leftHandKeyEnum.WITHIN = this.keyEnum.A;
+            this.leftHandKeyEnum.WITHOUT = this.keyEnum.D;
+            this.leftHandKeyEnum.FORWARD = this.keyEnum.W;
+            this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        }
     }
 
 };
@@ -83,6 +136,7 @@ APP.prototype.handlerKeyUp = function (event) {
         case this.keyEnum.LEFT:
         case this.leftHandKeyEnum.LEFT:
             this.updateModel('left');
+            console.log("left");
             break;
         case this.keyEnum.RIGHT:
         case this.leftHandKeyEnum.RIGHT:
@@ -117,11 +171,11 @@ APP.prototype.keyEnum = {
     LEFT: 37,
     RIGHT: 39,
 
-    UP: 38,
-    DOWN: 40,
-
     IN: 33,
     OUT: 34,
+
+    UP: 38,
+    DOWN: 40,
 
     // US/FR
     Z: 90,

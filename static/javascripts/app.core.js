@@ -76,8 +76,9 @@ APP.prototype.run = function () {
     for (var i=0; i<3; ++i) {
         this.addNewElement();
     }
+
     // Draw bounding box
-    this.getBoundingBox();
+    this.scene.add(this.getBoundingBox());
 };
 
 APP.prototype.initKeyboard = function(language) {

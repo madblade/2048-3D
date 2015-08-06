@@ -51,7 +51,7 @@ APP.prototype.getBoundingBox = function() {
     geometry.vertices.push(new THREE.Vector3(max, min, min));
 
     var line = new THREE.Line(geometry, material);
-    this.scene.add(line);
+    return line;
 };
 
 APP.prototype.nextId = function () {
