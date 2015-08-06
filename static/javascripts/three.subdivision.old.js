@@ -18,6 +18,7 @@
 THREE.SubdivisionModifier = function ( subdivisions ) {
 
 	this.subdivisions = (subdivisions === undefined ) ? 1 : subdivisions;
+	this.supportUVs = true;
 
 };
 
@@ -130,7 +131,8 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 		var tmp = new THREE.Vector3();
 
 		var oldVertices, oldFaces;
-		var newVertices, newFaces; // newUVs = [];
+		var newVertices, newFaces; //
+		var newUVs = [];
 
 		var n, l, i, il, j, k;
 		var metaVertices, sourceEdges;

@@ -12,6 +12,14 @@ APP.prototype.handlerMouseDown = function (event) {
     event.preventDefault();
 };
 
+APP.prototype.handlerMouseWheel = function(event) {
+    event.preventDefault();
+
+    console.log("coucou");
+    var c = this.camera.position;
+    this.light.position.set(c.x+5, c.y+5, c.z);
+};
+
 APP.prototype.handlerMouseMove = function () {
     this.mouse.x = ( event.clientX - this.windowHalfX );
     this.mouse.y = ( event.clientY - this.windowHalfY );

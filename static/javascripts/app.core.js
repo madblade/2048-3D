@@ -36,6 +36,8 @@ APP = function () {
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
     window.addEventListener('mousedown', this.handlerMouseDown.bind(this), false);
     window.addEventListener('mousemove', this.handlerMouseMove.bind(this), false);
+    window.addEventListener('mousewheel', this.handlerMouseWheel.bind(this), false);
+    window.addEventListener('DOMMouseScroll', this.handlerMouseWheel.bind(this), false);
     window.addEventListener('mouseup', this.handlerMouseUp.bind(this), false);
     window.addEventListener('keyup', this.handlerKeyUp.bind(this), false);
     window.addEventListener('keydown', this.handlerKeyDown.bind(this), false);

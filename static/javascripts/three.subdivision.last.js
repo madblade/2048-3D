@@ -61,9 +61,9 @@ THREE.GeometryUtils.orderedKey = function ( a, b ) {
 // Returns a hashmap - of { edge_key: face_index }
 THREE.GeometryUtils.computeEdgeFaces = function ( geometry ) {
 
-	var i, il, v1, v2, j, k,
-		face, faceIndices, faceIndex,
-		edge,
+	var i, il,/* v1, v2, j, k,*/
+		face, /*faceIndices, faceIndex,*/
+		//edge,
 		hash,
 		edgeFaceMap = {};
 
@@ -106,10 +106,10 @@ THREE.GeometryUtils.computeEdgeFaces = function ( geometry ) {
 			hash = orderedKey( face.b, face.c );
 			mapEdgeHash( hash, i );
 
-			hash = orderedKey( face.c, face.d );
+			hash = orderedKey( face.c/*, face.d*/ );
 			mapEdgeHash( hash, i );
 
-			hash = orderedKey( face.d, face.a );
+			hash = orderedKey( /*face.d, */face.a );
 			mapEdgeHash( hash, i );
 
 		}
@@ -145,9 +145,9 @@ THREE.SubdivisionModifier.prototype.smooth = function ( oldGeometry ) {
 	// New set of vertices, faces and uvs
 	var newVertices = [], newFaces = [], newUVs = [];
 
-	function v( x, y, z ) {
+	/*function v( x, y, z ) {
 		newVertices.push( new THREE.Vector3( x, y, z ) );
-	}
+	}*/
 
 	var scope = this;
 	var orderedKey = THREE.GeometryUtils.orderedKey;
@@ -174,7 +174,6 @@ THREE.SubdivisionModifier.prototype.smooth = function ( oldGeometry ) {
 
 	function f4( a, b, c, d, oldFace, orders, facei ) {
 
-		// TODO move vertex selection over here!
 
 		var newFace = new THREE.Face4( a, b, c, d, null, oldFace.color, oldFace.materialIndex );
 
@@ -188,10 +187,10 @@ THREE.SubdivisionModifier.prototype.smooth = function ( oldGeometry ) {
 
 				order = orders[i];
 
-				color = new THREE.Color(),
+				color = new THREE.Color();
 				color.setRGB(0,0,0);
 
-				for (var j=0, jl=0; j<order.length;j++) {
+				for (var j=0; j<order.length;j++) {
 					tmpColor = oldFace.vertexColors[order[j]-1];
 					color.r += tmpColor.r;
 					color.g += tmpColor.g;
@@ -239,20 +238,19 @@ THREE.SubdivisionModifier.prototype.smooth = function ( oldGeometry ) {
 		edgePoints = {}; // these are new points on exisiting edges
 
 	var sharpEdges = {}, sharpVertices = []; // Mark edges and vertices to prevent smoothening on them
-	// TODO: handle this correctly.
 
 	var uvForVertices = {}; // Stored in {vertex}:{old face} format
 
 
-	function debugCoreStuff() {
+    /*	function debugCoreStuff() {
 
 		console.log('facePoints', facePoints, 'edgePoints', edgePoints);
 		console.log('edgeFaceMap', edgeFaceMap, 'vertexEdgeMap', vertexEdgeMap);
 
-	}
+	}*/
 
 	function getUV(vertexNo, oldFaceNo) {
-		var j,jl;
+		//var j,jl;
 
 		var key = vertexNo+':'+oldFaceNo;
 		var theUV = uvForVertices[key];
@@ -347,8 +345,8 @@ THREE.SubdivisionModifier.prototype.smooth = function ( oldGeometry ) {
 
 		} else if ( face instanceof THREE.Face4 ) {
 
-			avgUv.x = getUV( face.a, i ).x + getUV( face.b, i ).x + getUV( face.c, i ).x + getUV( face.d, i ).x;
-			avgUv.y = getUV( face.a, i ).y + getUV( face.b, i ).y + getUV( face.c, i ).y + getUV( face.d, i ).y;
+			avgUv.x = getUV( face.a, i ).x + getUV( face.b, i ).x + getUV( face.c, i ).x + getUV( /*face.d,*/ i ).x;
+			avgUv.y = getUV( face.a, i ).y + getUV( face.b, i ).y + getUV( face.c, i ).y + getUV( /*face.d,*/ i ).y;
 			avgUv.x /= 4;
 			avgUv.y /= 4;
 
@@ -433,18 +431,6 @@ THREE.SubdivisionModifier.prototype.smooth = function ( oldGeometry ) {
 
 	}
 
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
 	for (i in edgeFaceMap) {
 
 		edge = edgeFaceMap[i];
@@ -633,7 +619,7 @@ THREE.SubdivisionModifier.prototype.smooth = function ( oldGeometry ) {
 
 		/*
 		if (sharpEdgeCount>2) {
-			// TODO
+
 		}
 		*/
 
