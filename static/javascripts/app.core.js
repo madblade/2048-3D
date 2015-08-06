@@ -14,6 +14,7 @@ APP = function () {
     // Detect language (fr/us)
     this.language = window.navigator.userLanguage || window.navigator.language;
     this.initKeyboard(this.language);
+    this.setLanguage("fr");
 
     // Set up renderer
     this.container = document.getElementById('container');
@@ -79,6 +80,13 @@ APP.prototype.run = function () {
 
     // Draw bounding box
     this.scene.add(this.getBoundingBox());
+};
+
+APP.prototype.setLanguage = function(language) {
+    console.warn("WARN - app.setLanguage(str) overrides " + this.language + " presets. " +
+        "\nIf you launched it manually, you may have to restart the app for the camera to be properly adapted.");
+    this.language = language;
+    this.initKeyboard();
 };
 
 APP.prototype.initKeyboard = function(language) {
@@ -231,7 +239,6 @@ APP.prototype.loopFactor = function(dimension, direction) {
         if (second === undefined) {
             continue;
         } else if (second.meta.val === first.meta.val) {
-            //console.log("theres a second " + "(x=" + second.meta.i + ", y=" + second.meta.j + ", z=" + second.meta.k + ")");
             this.setMetaIJKFromObject(dimension, second, first, direction, true);
             second.meta.fused = true;
             this.cubesToDelete.push(second);

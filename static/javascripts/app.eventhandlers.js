@@ -136,7 +136,6 @@ APP.prototype.handlerKeyUp = function (event) {
         case this.keyEnum.LEFT:
         case this.leftHandKeyEnum.LEFT:
             this.updateModel('left');
-            console.log("left");
             break;
         case this.keyEnum.RIGHT:
         case this.leftHandKeyEnum.RIGHT:
