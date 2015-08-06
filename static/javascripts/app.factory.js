@@ -50,8 +50,7 @@ APP.prototype.getBoundingBox = function() {
     geometry.vertices.push(new THREE.Vector3(max, min, max));
     geometry.vertices.push(new THREE.Vector3(max, min, min));
 
-    var line = new THREE.Line(geometry, material);
-    return line;
+    return new THREE.Line(geometry, material);
 };
 
 APP.prototype.nextId = function () {
@@ -64,71 +63,71 @@ APP.prototype.addCube = function (i, j, k, value) {
     var color;
 
     switch(value) {
-        case 1:
-            color = new THREE.Color(0xEDD9D0);
-            break;
         case 2:
-            color = new THREE.Color(0x7A9CBA);
+            color = new THREE.Color(0xEDD9D0); // beige
             break;
         case 4:
-            color = new THREE.Color(0x0476BD);
+            color = new THREE.Color(0xFFD389); // orange-yellow
             break;
         case 8:
-            color = new THREE.Color(0x56A99D);
+            color = new THREE.Color(0xCA5D31); // orange
             break;
         case 16:
-            color = new THREE.Color(0x336B49);
+            color = new THREE.Color(0x6F0000); // deep red
             break;
         case 32:
-            color = new THREE.Color(0x5C6441);
+            color = new THREE.Color(0x000000); // black
             break;
         case 64:
-            color = new THREE.Color(0x746933);
+            color = new THREE.Color(0x59394E); // purple
             break;
         case 128:
-            color = new THREE.Color(0xA9874B);
+            //color = new THREE.Color(0xA9874B);
+            color = new THREE.Color(0x0476BD); // full blue
             break;
         case 256:
-            color = new THREE.Color(0xCA5D31);
+            //color = new THREE.Color(0x35563A);
+            color = new THREE.Color(0x2295FF); // shiny blue
             break;
         case 512:
-            color = new THREE.Color(0x7F280C);
+            //color = new THREE.Color(0x7F280C);
+            color = new THREE.Color(0x8BCDFF); // cyan
             break;
         case 1024:
-            color = new THREE.Color(0x1D1D25);
+            color = new THREE.Color(0x7B9B7B); // light green
             break;
         case 2048:
-            color = new THREE.Color(0x59394E);
+            color = new THREE.Color(0x59394E); // true green
             break;
         case 4096:
-            color = new THREE.Color(0x4F4335);
+            color = new THREE.Color(0x4F4335); // ?
             break;
         case 8192:
-            color = new THREE.Color(0xFFD389);
+            color = new THREE.Color(0xFFD389); // ?
             break;
         case 16384:
-            color = new THREE.Color(0xF4F5F7);
+            color = new THREE.Color(0xF4F5F7); // ?
             break;
         case 32768:
-            color = new THREE.Color(0x35563A);
+            color = new THREE.Color(0x35563A); // ?
             break;
         case 65536:
-            color = new THREE.Color(0xFF6174);
+            color = new THREE.Color(0xFF6174); // ?
             break;
         case 131072:
-            color = new THREE.Color(0xBDD510);
+            color = new THREE.Color(0xBDD510); // ?
             break;
         case 262144:
-            color = new THREE.Color(0x684922);
+            color = new THREE.Color(0x684922); // ?
             break;
         case 524288:
-            color = new THREE.Color(0xFFAC00);
+            color = new THREE.Color(0xFFAC00); // ?
             break;
         case 1048576:
-            color = new THREE.Color(0x2C60C9);
+            color = new THREE.Color(0x2C60C9); // ?
             break;
         case 2097152:
-            color = new THREE.Color(0xCEAACB);
+            color = new THREE.Color(0xCEAACB); // ?
             break;
 
         default:
