@@ -1,14 +1,22 @@
 # 2048-3D
 3D variant of the game by @gabrielecirulli
 
-Malkovich malkovich malkovich.
+This is a simple HTML5/WebGL game, compatible with Chrome (and Firefox), written in JavaScript with three.js.
 
-# Malkovich
-Malkovich malkovich, malkovich malkovich malkovich malkovich.
+### Installation
+Download the archive, extract it and launch it with your favorite browser by double clicking index.html.
 
-## Malkovich...
-Malkovich, malkovich malkovich. Malkovich...
+## How to play
+Use arrows or `WASD` / `ZQSD` controls to move all blocks in the desired direction.
 
-## Malkovich !
-Malkovich: malkovich malkovich malkovich, malkovich!
-MALKOVICH !!
+Blocks can be moved towards the camera with `C` or backwards with `E`.
+
+When two blocks with the same color collide, they merge into a new block. Try to get as far as you can!
+
+## Additional controls
+Use your mouse (left click + move) to rotate the camera around the scene. Controls will be automatically updated.
+
+You may also zoom with the middle mouse button.
+
+## Screens
+
