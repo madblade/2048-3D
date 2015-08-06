@@ -11,6 +11,10 @@ APP = function () {
 
     this.scene = this.getScene();
 
+    // Detect language (fr/us)
+    this.language = window.navigator.userLanguage || window.navigator.language;
+    this.initKeyboard(this.language);
+
     // Set up renderer
     this.container = document.getElementById('container');
     this.renderer = this.getRenderer();
@@ -74,6 +78,22 @@ APP.prototype.run = function () {
     }
     // Draw bounding box
     this.getBoundingBox();
+};
+
+APP.prototype.initKeyboard = function(language) {
+    if (language == undefined || language != "fr") {
+        this.leftHandKeyEnum.FORWARD = this.keyEnum.W;
+        this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        this.leftHandKeyEnum.LEFT =this.keyEnum.A;
+        this.leftHandKeyEnum.RIGHT = this.keyEnum.D;
+    } else {
+        this.leftHandKeyEnum.FORWARD = this.keyEnum.Z;
+        this.leftHandKeyEnum.BACKWARDS = this.keyEnum.S;
+        this.leftHandKeyEnum.LEFT =this.keyEnum.Q;
+        this.leftHandKeyEnum.RIGHT = this.keyEnum.D;
+    }
+    this.leftHandKeyEnum.WITHIN = this.keyEnum.E;
+    this.leftHandKeyEnum.WITHOUT = this.keyEnum.C;
 };
 
 APP.prototype.getIJKGeneric = function(dimension, variant, invariantOne, invariantTwo) {

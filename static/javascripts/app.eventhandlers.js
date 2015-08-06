@@ -81,23 +81,29 @@ APP.prototype.handlerKeyUp = function (event) {
 
     switch (event.keyCode) {
         case this.keyEnum.LEFT:
+        case this.leftHandKeyEnum.LEFT:
             this.updateModel('left');
             break;
         case this.keyEnum.RIGHT:
+        case this.leftHandKeyEnum.RIGHT:
             this.updateModel('right');
             break;
 
         case this.keyEnum.UP:
+        case this.leftHandKeyEnum.FORWARD:
             this.updateModel('up');
             break;
         case this.keyEnum.DOWN:
+        case this.leftHandKeyEnum.BACKWARDS:
             this.updateModel('down');
             break;
 
         case this.keyEnum.IN:
+        case this.leftHandKeyEnum.WITHIN:
             this.updateModel('in');
             break;
         case this.keyEnum.OUT:
+        case this.leftHandKeyEnum.WITHOUT:
             this.updateModel('out');
             break;
     }
@@ -115,5 +121,27 @@ APP.prototype.keyEnum = {
     DOWN: 40,
 
     IN: 33,
-    OUT: 34
+    OUT: 34,
+
+    // US/FR
+    Z: 90,
+    S: 83,
+    Q: 81,
+    D: 68,
+
+    W: 87,
+    A: 65,
+
+    E: 69,
+    C: 67
+};
+
+APP.prototype.leftHandKeyEnum = {
+    FORWARD: 0,
+    BACKWARDS: 0,
+    LEFT: 0,
+    RIGHT: 0,
+
+    WITHIN: 0,
+    WITHOUT: 0
 };
