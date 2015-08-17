@@ -25,6 +25,24 @@ APP.prototype.getControls = function () {
     return controls;
 };
 
+APP.prototype.getChargeModal = function() {
+    return this.modal === undefined ? {
+        display: function (status) { document.getElementById('modal-charge').style.display = status ? 'inline' : 'none' },
+        //message: function (message) { document.getElementById('message').innerHTML = message }
+    } : this.modal;
+};
+
+APP.prototype.getSaveModal = function() {
+    return this.modal === undefined ? {
+        display: function (status) { document.getElementById('modal-save').style.display = status ? 'inline' : 'none' },
+        //message: function (message) { document.getElementById('message').innerHTML = message }
+    } : this.modal;
+};
+
+APP.prototype.fillSaveModal = function() {
+    document.getElementById('modal-save-raw').innerHTML = "aaaaAAA";
+};
+
 APP.prototype.getBoundingBox = function() {
     var material = new THREE.LineBasicMaterial({color: 0x1d1d25});
     var geometry = new THREE.Geometry();

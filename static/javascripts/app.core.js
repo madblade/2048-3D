@@ -27,6 +27,10 @@ APP = function () {
     // Set up controls
     this.controls = this.getControls();
 
+    // Set up modal
+    this.chargeModal = this.getChargeModal();
+    this.saveModal = this.getSaveModal();
+
     // Set up mouse
     this.mouse = {x:0, y:0};
     this.windowHalfX = window.innerWidth / 2;
