@@ -28,8 +28,7 @@ APP = function () {
     this.controls = this.getControls();
 
     // Set up modal
-    this.chargeModal = this.getChargeModal();
-    this.saveModal = this.getSaveModal();
+    this.aModalIsOpen = false;
 
     // Set up mouse
     this.mouse = {x:0, y:0};

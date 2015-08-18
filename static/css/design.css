@@ -31,3 +31,16 @@ a:hover, a:focus {
 #fpsGraph, #msGraph {
     display: none;
 }
+
+.transparent {
+    background-color: transparent;
+}
+
+textarea.form-control {
+    height: 100%;
+}
+
+.beige {
+    position:absolute;
+    background-color: #ACA39C;
+}

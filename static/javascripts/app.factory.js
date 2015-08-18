@@ -25,22 +25,61 @@ APP.prototype.getControls = function () {
     return controls;
 };
 
-APP.prototype.getChargeModal = function() {
-    return this.modal === undefined ? {
-        display: function (status) { document.getElementById('modal-charge').style.display = status ? 'inline' : 'none' },
-        //message: function (message) { document.getElementById('message').innerHTML = message }
-    } : this.modal;
-};
-
-APP.prototype.getSaveModal = function() {
-    return this.modal === undefined ? {
-        display: function (status) { document.getElementById('modal-save').style.display = status ? 'inline' : 'none' },
-        //message: function (message) { document.getElementById('message').innerHTML = message }
-    } : this.modal;
-};
-
 APP.prototype.fillSaveModal = function() {
-    document.getElementById('modal-save-raw').innerHTML = "aaaaAAA";
+    this.aModalIsOpen = true;
+
+    if (this.meshes.length<1) return;
+
+    var inner = "[";
+    var meshId, currentMesh;
+    for (meshId= 0; meshId<this.meshes.length-1; ++meshId) {
+        currentMesh = this.meshes[meshId];
+
+        inner += "[";
+        inner += currentMesh.meta.i
+                + "," + currentMesh.meta.j
+                + "," + currentMesh.meta.k
+                + "," + currentMesh.meta.val;
+        inner += "],";
+    }
+    currentMesh = this.meshes[meshId];
+    inner += "[" +
+        currentMesh.meta.i
+        + "," + currentMesh.meta.j
+        + "," + currentMesh.meta.k
+        + "," + currentMesh.meta.val
+        + "]]";
+
+    $('#modal-save-raw').html(inner).css('height', '300');
+};
+
+APP.prototype.fillChargeModal = function() {
+    this.aModalIsOpen = true;
+};
+
+APP.prototype.doneSaveModal = function() {
+    this.aModalIsOpen = false;
+};
+
+APP.prototype.doneChargeModal = function() {
+    this.aModalIsOpen = false;
+};
+
+APP.prototype.doChargeModal = function() {
+    this.aModalIsOpen = false;
+
+    var mod = $('#modal-charge-raw').val();
+
+    for (var meshId in this.meshes)
+        this.scene.remove(this.meshes[meshId]);
+    this.meshes = [];
+
+    // TODO check validity
+    var parsed = JSON.parse(mod);
+    for (var parsedId in parsed) {
+        this.addCube(parsed[parsedId][0], parsed[parsedId][1],
+            parsed[parsedId][2], parsed[parsedId][3]);
+    }
 };
 
 APP.prototype.getBoundingBox = function() {

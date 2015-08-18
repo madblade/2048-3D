@@ -9,7 +9,6 @@ APP.prototype.onWindowResize = function () {
 };
 
 APP.prototype.handlerMouseDown = function (event) {
-    event.preventDefault();
 };
 
 APP.prototype.handlerMouseWheel = function (event) {
@@ -20,6 +19,11 @@ APP.prototype.handlerMouseWheel = function (event) {
 };
 
 APP.prototype.handlerMouseMove = function () {
+    if (this.aModalIsOpen) {
+        event.stopPropagation();
+        return;
+    }
+
     this.mouse.x = ( event.clientX - this.windowHalfX );
     this.mouse.y = ( event.clientY - this.windowHalfY );
 
@@ -125,10 +129,19 @@ APP.prototype.handlerMouseMove = function () {
 };
 
 APP.prototype.handlerMouseUp = function (event) {
+    if (this.aModalIsOpen) {
+        event.stopPropagation();
+        return;
+    }
+
     event.preventDefault();
 };
 
 APP.prototype.handlerKeyUp = function (event) {
+    if (this.aModalIsOpen) {
+        event.stopPropagation();
+        return;
+    }
     event.preventDefault();
     if (this.isTweening || this.isUpdating) return;
 
@@ -163,7 +176,7 @@ APP.prototype.handlerKeyUp = function (event) {
 };
 
 APP.prototype.handlerKeyDown = function (event) {
-    event.preventDefault();
+    //event.preventDefault();
 };
 
 APP.prototype.keyEnum = {
