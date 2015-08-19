@@ -73,7 +73,7 @@ APP.prototype.doChargeModal = function() {
         console.warn("WARN: unsupported text format.");
         return;
     }
-    // TODO check validity
+
     var parsed = JSON.parse(mod);
     for (var testId in parsed) {
         if (parsed[testId].length != 4) {
@@ -150,75 +150,101 @@ APP.prototype.nextId = function () {
 
 APP.prototype.addCube = function (i, j, k, value) {
 
-    var color;
+    var material;
 
     switch(value) {
         case 2:
-            color = new THREE.Color(0xEDD9D0); // beige
+            // Grey
+            material = new THREE.MeshLambertMaterial({
+                color : new THREE.Color(0xffffff),
+                transparent:true,
+                opacity: 0.3
+            });
             break;
         case 4:
-            color = new THREE.Color(0xFFD389); // orange-yellow
+            material = new THREE.MeshLambertMaterial({
+                color : new THREE.Color(0xD1B39B),
+                transparent:true,
+                opacity: 0.6
+            });
             break;
         case 8:
-            color = new THREE.Color(0xCA5D31); // orange
+            // Bronze
+            material = new THREE.MeshPhongMaterial({color : new THREE.Color(0xCC8E5E)});
             break;
         case 16:
-            color = new THREE.Color(0x6F0000); // deep red
+            // Silver
+            material = new THREE.MeshPhongMaterial({
+                color : new THREE.Color(0xC0C0C0)
+            });
             break;
         case 32:
-            color = new THREE.Color(0x000000); // black
+            // Gold
+            material = new THREE.MeshPhongMaterial({
+                color : new THREE.Color(0xFFD700)
+            });
             break;
         case 64:
-            color = new THREE.Color(0x59394E); // purple
+            // Sapphire
+            material = new THREE.MeshLambertMaterial({
+                color : new THREE.Color(0x0f52ba),
+                transparent: true,
+                shininess: 100,
+                opacity: 0.9
+            });
             break;
         case 128:
-            //color = new THREE.Color(0xA9874B);
-            color = new THREE.Color(0x0476BD); // full blue
+            // Emerald
+            material = new THREE.MeshLambertMaterial({
+                color : new THREE.Color(0x50c878),
+                transparent: true,
+                shininess: 100,
+                opacity: 0.9
+            });
             break;
         case 256:
-            //color = new THREE.Color(0x35563A);
-            color = new THREE.Color(0x2295FF); // shiny blue
+            // Ruby
+            material = new THREE.MeshLambertMaterial({
+                color : new THREE.Color(0xe0115f),
+                transparent: true,
+                shininess: 100,
+                opacity: 0.9
+            });
             break;
         case 512:
-            //color = new THREE.Color(0x7F280C);
-            color = new THREE.Color(0x8BCDFF); // cyan
+            // Diamond
+            material = new THREE.MeshLambertMaterial({
+                color : new THREE.Color(0xB9F2FF),
+                shininess: 100
+            });
             break;
         case 1024:
-            color = new THREE.Color(0x7B9B7B); // light green
+            material = new THREE.MeshLambertMaterial({
+                color : new THREE.Color(0xEDD9D0)
+            });
             break;
         case 2048:
-            color = new THREE.Color(0x59394E); // true green
-            break;
+            //break;
         case 4096:
-            color = new THREE.Color(0x4F4335); // ?
-            break;
+            //break;
         case 8192:
-            color = new THREE.Color(0xFFD389); // ?
-            break;
+            //break;
         case 16384:
-            color = new THREE.Color(0xF4F5F7); // ?
-            break;
+            //break;
         case 32768:
-            color = new THREE.Color(0x35563A); // ?
-            break;
+            //break;
         case 65536:
-            color = new THREE.Color(0xFF6174); // ?
-            break;
+            //break;
         case 131072:
-            color = new THREE.Color(0xBDD510); // ?
-            break;
+            //break;
         case 262144:
-            color = new THREE.Color(0x684922); // ?
-            break;
+            //break;
         case 524288:
-            color = new THREE.Color(0xFFAC00); // ?
-            break;
+            //break;
         case 1048576:
-            color = new THREE.Color(0x2C60C9); // ?
-            break;
+            //break;
         case 2097152:
-            color = new THREE.Color(0xCEAACB); // ?
-            break;
+            //break;
 
         default:
             var normalized = 2 * Math.log(value)/(10*Math.log(2));
@@ -226,29 +252,12 @@ APP.prototype.addCube = function (i, j, k, value) {
             var b = Math.max(0, 255 * (1 - normalized))/256;
             var r = Math.max(0, 255 * (normalized - 1))/256;
             var g = (1 - b - r);
-            color = new THREE.Color(r, g, b);
+
+            material = new THREE.MeshLambertMaterial({color : new THREE.Color(r, g, b)});
             break;
     }
 
-    // Old Textures
-    /*
-    var canvas = document.createElement('canvas');
-    canvas.id = this.nextId();
-    var texture = new THREE.Texture(canvas);
-    canvas.height = 256;
-    canvas.width = 256;
-
-    var context = canvas.getContext("2d");
-    context.fillStyle = '#' + color.getHexString();
-    context.fillRect(0, 0, 256, 256);
-    context.fillStyle = value == 32 ? '#000000' : '#dddddd';
-    context.font = "40pt Verdana bold";
-    var textSize = context.measureText("" + value);
-    context.fillText(value, (canvas.width-textSize.width)/2, (canvas.height+20)/2);
-    texture.needsUpdate = true;
-
-    var material = new THREE.MeshLambertMaterial({map : texture});
-    */
+    //TODO animate add cube
 
     // Smooth cubes
     var modifier = new THREE.SubdivisionModifier(2);
@@ -260,7 +269,6 @@ APP.prototype.addCube = function (i, j, k, value) {
     modifier.modify( geometry );
 
     // Build mesh
-    var material = new THREE.MeshLambertMaterial({color : color});
     var mesh = new THREE.Mesh(geometry, material);
 
     // Init position and meta
