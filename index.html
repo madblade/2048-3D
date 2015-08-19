@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>2048-3D alpha testing</title>
+    <title>2048-3D</title>
 
     <link rel="stylesheet" type="text/css" href="static/css/design.css">
     <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
@@ -15,12 +15,13 @@
 
 <body>
 
-        <div class="wrapper text-center transparent beige">
-            <div class="btn-group">
-                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modal-save" onclick="app.fillSaveModal();">Save</button>
-                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modal-charge" onclick="app.fillChargeModal();">Charge</button>
-            </div>
+    <div class="wrapper text-center transparent beige">
+        <div class="btn-group">
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modal-save" onclick="app.fillSaveModal();">Save</button>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modal-charge" onclick="app.doingModal();">Load</button>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modal-help" onclick="app.fillHelpModal();">Help</button>
         </div>
+    </div>
     <div id="container">
     </div>
 
@@ -50,16 +51,14 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" onclick="app.doneSaveModal();">&times;</button>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title">Save</h4>
                 </div>
                 <div class="modal-body">
                     <textarea class="form-control" id="modal-save-raw"></textarea>
                 </div>
                 <div class="modal-footer">
-<!--
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="app.doneSaveModal();">Save</button>
--->
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Save</button>
                 </div>
             </div>
 
@@ -73,13 +72,51 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Charge</h4>
+                    <h4 class="modal-title">Load</h4>
                 </div>
                 <div class="modal-body">
-                        <textarea class="form-control" id="modal-charge-raw" onclick="app.doneChargeModal();"></textarea>
+                        <textarea class="form-control" id="modal-charge-raw"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="app.doChargeModal();">Charge</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="app.doChargeModal();">Load</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="modal-help" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h2 class="modal-title">Help</h2>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <h3>How to play</h3>
+                        <p>Use
+                            <strong id="top-key">W</strong>, <strong id="left-key">A</strong>, <strong>S</strong>, <strong>D</strong> or
+                            <strong>&#8593;</strong>, <strong>&#8595;</strong>, <strong>&#8592;</strong>, <strong>&#8594;</strong> to move and merge cubes.
+                            <br/>
+                            Use <strong>E</strong> or <strong>&#8670;</strong> to move them towards the screen,
+                            <strong>C</strong> or <strong>&#8671;</strong> to move them towards you.
+                        </p>
+                        <p>
+                            You may rotate the camera by left-clicking and moving your mouse. Zooming with the mouse wheel is also enabled.
+                        </p>
+
+                        <h3>Saving and charging games</h3>
+                        <p>
+                            Click 'Save' to display the state of the current game. You may copy it somewhere for later loading.
+                        </p>
+                        <p>
+                            Click 'Load' and paste the previously saved state, then click 'Load' again to apply the charge.
+                            Beware, the current game state will be lost. Use <strong>Ctrl+F5</strong> to reload everything.
+                        </p>
+                    </div>
                 </div>
             </div>
 

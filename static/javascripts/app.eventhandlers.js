@@ -9,6 +9,9 @@ APP.prototype.onWindowResize = function () {
 };
 
 APP.prototype.handlerMouseDown = function (event) {
+    if (this.aModalIsOpen) {
+        event.stopPropagation();
+    }
 };
 
 APP.prototype.handlerMouseWheel = function (event) {
@@ -142,6 +145,7 @@ APP.prototype.handlerKeyUp = function (event) {
         event.stopPropagation();
         return;
     }
+
     event.preventDefault();
     if (this.isTweening || this.isUpdating) return;
 

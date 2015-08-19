@@ -29,6 +29,9 @@ APP = function () {
 
     // Set up modal
     this.aModalIsOpen = false;
+    $(document).on('hidden.bs.modal', '.modal', function(){
+        app.doneModal();
+    });
 
     // Set up mouse
     this.mouse = {x:0, y:0};

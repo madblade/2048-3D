@@ -26,7 +26,7 @@ APP.prototype.getControls = function () {
 };
 
 APP.prototype.fillSaveModal = function() {
-    this.aModalIsOpen = true;
+    this.doingModal();
 
     if (this.meshes.length<1) return;
 
@@ -53,20 +53,15 @@ APP.prototype.fillSaveModal = function() {
     $('#modal-save-raw').html(inner).css('height', '300');
 };
 
-APP.prototype.fillChargeModal = function() {
+APP.prototype.doneModal = function() {
+    this.aModalIsOpen = false;
+};
+
+APP.prototype.doingModal = function() {
     this.aModalIsOpen = true;
 };
 
-APP.prototype.doneSaveModal = function() {
-    this.aModalIsOpen = false;
-};
-
-APP.prototype.doneChargeModal = function() {
-    this.aModalIsOpen = false;
-};
-
 APP.prototype.doChargeModal = function() {
-    this.aModalIsOpen = false;
 
     var mod = $('#modal-charge-raw').val();
 
@@ -74,11 +69,49 @@ APP.prototype.doChargeModal = function() {
         this.scene.remove(this.meshes[meshId]);
     this.meshes = [];
 
+    if (mod == undefined || mod.length == 0) {
+        console.warn("WARN: unsupported text format.");
+        return;
+    }
     // TODO check validity
     var parsed = JSON.parse(mod);
+    for (var testId in parsed) {
+        if (parsed[testId].length != 4) {
+            console.warn("WARN: unsupported charge string format.");
+            return;
+        }
+        for (var i = 0; i<4; ++i)
+            if (parsed[testId][i] !== parseInt(parsed[testId][i])) {
+                console.warn("WARN: charge string must be composed of integers.");
+                return;
+            }
+
+        var mustBeInteger = Math.log(parsed[testId][3])/Math.log(2);
+        if (mustBeInteger !== parseInt(mustBeInteger)) {
+            console.warn("WARN: last integer must be a power of two.");
+            return;
+        }
+    }
+
     for (var parsedId in parsed) {
         this.addCube(parsed[parsedId][0], parsed[parsedId][1],
             parsed[parsedId][2], parsed[parsedId][3]);
+    }
+};
+
+APP.prototype.fillHelpModal = function() {
+    this.doingModal();
+
+    if (this.leftHandKeyEnum.FORWARD == this.keyEnum.W) {
+        $('#top-key').html("W");
+    } else if (this.leftHandKeyEnum.FORWARD == this.keyEnum.Z) {
+        $('#top-key').html("Z");
+    }
+
+    if (this.leftHandKeyEnum.LEFT == this.keyEnum.Q) {
+        $('#left-key').html("Q");
+    } else if (this.leftHandKeyEnum.LEFT == this.keyEnum.A) {
+        $('#left-key').html("A");
     }
 };
 

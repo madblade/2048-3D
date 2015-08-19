@@ -43,4 +43,6 @@ textarea.form-control {
 .beige {
     position:absolute;
     background-color: #ACA39C;
+    left:1%;
+    top:1%;
 }
