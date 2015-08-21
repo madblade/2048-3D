@@ -257,8 +257,6 @@ APP.prototype.addCube = function (i, j, k, value) {
             break;
     }
 
-    //TODO animate add cube
-
     // Smooth cubes
     var modifier = new THREE.SubdivisionModifier(2);
     var geometry = new THREE.BoxGeometry(1, 1, 1, 4, 4, 4);
@@ -277,4 +275,6 @@ APP.prototype.addCube = function (i, j, k, value) {
 
     this.scene.add(mesh);
     this.meshes.push(mesh);
+
+    return mesh;
 };

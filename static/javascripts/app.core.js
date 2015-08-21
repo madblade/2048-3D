@@ -54,6 +54,7 @@ APP = function () {
     window.addEventListener('keydown', this.handlerKeyDown.bind(this), false);
 
     // Run
+    this.numberOfActiveTweens = 0;
     this.currentId = 0;
     this.run();
 
@@ -65,7 +66,6 @@ APP = function () {
     this.someOneHasMoved = false;
     this.cubesToDelete = [];
     this.cubesToCreate = [];
-    this.numberOfActiveTweens = 0;
 };
 
 APP.prototype.run = function () {

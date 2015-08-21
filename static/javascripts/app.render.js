@@ -17,6 +17,33 @@ APP.prototype.animate = function () {
     TWEEN.update();
 };
 
+APP.prototype.setupTweenSimple = function(obj, prop, targetValue) {
+    this.setupTweenSimpleAdaptee(obj, prop, targetValue);
+};
+
+APP.prototype.setupTweenSimpleAdaptee = function(obj, prop, targetValue) {
+    var update = function () {
+        obj[prop] = current.property;
+    };
+
+    var current = {property: obj[prop]};
+    var target = {property: targetValue};
+
+    var tween = new TWEEN.Tween(current).to(target, 200)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .onUpdate(update)
+        .onComplete(function() {
+            this.numberOfActiveTweens --;
+            if (this.numberOfActiveTweens == 0) {
+                this.isTweening = false;
+            }
+        }.bind(this));
+
+    this.numberOfActiveTweens ++;
+    this.isTweening = true;
+    tween.start();
+};
+
 APP.prototype.setupTween = function(obj, prop, targetValue) {
     if (obj[prop] !== targetValue) this.someOneHasMoved = true;
     this.setupTweenAdaptee(obj, prop, targetValue);
@@ -95,12 +122,15 @@ APP.prototype.addNewElement = function() {
     if (currentTry > 900) {
         console.log("Seems bad.");
     } else {
-        this.addCube(i, j, k, Math.random() > 0.3 ? 2 : 4);
+        var mesh = this.addCube(i, j, k, Math.random() > 0.3 ? 2 : 4);
+        mesh.scale.set(0.1, 0.1, 0.1);
+        this.setupTweenSimple(mesh.scale, 'x', 1.0);
+        this.setupTweenSimple(mesh.scale, 'y', 1.0);
+        this.setupTweenSimple(mesh.scale, 'z', 1.0);
     }
 };
 
 
 APP.prototype.isNotValid = function(i, j, k) {
-    if (this.getIJK(i, j, k) === undefined) return false;
-    return true;
+    return (this.getIJK(i, j, k) !== undefined);
 };
