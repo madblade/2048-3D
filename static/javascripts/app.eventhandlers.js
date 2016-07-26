@@ -239,8 +239,10 @@ APP.prototype.manageMobile = function() {
     }, false);
 
     window.addEventListener('touchmove', function(e){
-        // e.preventDefault(); // prevent scrolling when inside DIV
-        if (e.touches.length > 1) valid = false;
+        if (e.touches.length > 1) {
+            e.preventDefault(); // prevent three.js controls
+            valid = false;
+        }
     }, false);
 
     var scope = this;
@@ -257,8 +259,8 @@ APP.prototype.manageMobile = function() {
 
         var toRight =   (hasSwiped && daX > threshold && daY <= 100 && dX >= 0);
         var toLeft =    (hasSwiped && daX > threshold && daY <= 100 && dX < 0);
-        var toTop =     (hasSwiped && daY > threshold && daX <= 100 && dY >= 0);
-        var toBottom =  (hasSwiped && daY > threshold && daX <= 100 && dY < 0);
+        var toTop =     (hasSwiped && daY > threshold && daX <= 100 && dY < 0);
+        var toBottom =  (hasSwiped && daY > threshold && daX <= 100 && dY >= 0);
 
         var nb = 0;
         if (toRight) nb++; if (toLeft) nb++; if (toTop) nb++; if (toBottom) nb++;
