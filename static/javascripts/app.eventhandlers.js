@@ -227,9 +227,9 @@ APP.prototype.manageMobile = function() {
     var valid = true;
 
     window.addEventListener('touchstart', function(e){
-        e.preventDefault();
         var numberTouches = e.touches.length;
         valid = (numberTouches > 1);
+        if (valid) e.preventDefault();
 
         var touchobj = e.changedTouches[0];
         dX = 0; dY = 0; daX = 0; daY = 0;
@@ -245,8 +245,8 @@ APP.prototype.manageMobile = function() {
 
     var scope = this;
     window.addEventListener('touchend', function(e){
-        e.preventDefault();
         if (!valid) return;
+        e.preventDefault();
 
         var touchobj = e.changedTouches[0];
         dX = touchobj.pageX - startX; daX = Math.abs(dX);
