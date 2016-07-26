@@ -215,3 +215,62 @@ APP.prototype.leftHandKeyEnum = {
     WITHIN: 0,
     WITHOUT: 0
 };
+
+APP.prototype.manageMobile = function() {
+    var startX,
+        startY,
+        dX, dY, daX, daY,
+        threshold = 150, //required min distance traveled to be considered swipe
+        allowedTime = 250, // maximum time allowed to travel that distance
+        elapsedTime,
+        startTime;
+    var valid = true;
+
+    window.addEventListener('touchstart', function(e){
+        e.preventDefault();
+        var numberTouches = e.touches.length;
+        valid = (numberTouches > 1);
+
+        var touchobj = e.changedTouches[0];
+        dX = 0; dY = 0; daX = 0; daY = 0;
+        startX = touchobj.pageX;
+        startY = touchobj.pageY;
+        startTime = new Date().getTime(); // record time when finger first makes contact with surface
+    }, false);
+
+    window.addEventListener('touchmove', function(e){
+        // e.preventDefault(); // prevent scrolling when inside DIV
+        if (e.touches.length > 1) valid = false;
+    }, false);
+
+    var scope = this;
+    window.addEventListener('touchend', function(e){
+        e.preventDefault();
+        if (!valid) return;
+
+        var touchobj = e.changedTouches[0];
+        dX = touchobj.pageX - startX; daX = Math.abs(dX);
+        dY = touchobj.pageY - startY; daY = Math.abs(dY);
+
+        elapsedTime = new Date().getTime() - startTime; // get time elapsed
+        var hasSwiped = elapsedTime <= allowedTime;
+
+        var toRight =   (hasSwiped && daX > threshold && daY <= 100 && dX >= 0);
+        var toLeft =    (hasSwiped && daX > threshold && daY <= 100 && dX < 0);
+        var toTop =     (hasSwiped && daY > threshold && daX <= 100 && dY >= 0);
+        var toBottom =  (hasSwiped && daY > threshold && daX <= 100 && dY < 0);
+
+        var nb = 0;
+        if (toRight) nb++; if (toLeft) nb++; if (toTop) nb++; if (toBottom) nb++;
+        if (nb === 0) {
+        } else if (nb === 1) {
+            if (toRight) scope.updateModel('right');
+            if (toLeft) scope.updateModel('left');
+            if (toTop) scope.updateModel('up');
+            if (toBottom) scope.updateModel('down');
+        } else {
+            console.log("Error in touch swipe detection...");
+        }
+
+    }, false);
+};

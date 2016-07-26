@@ -52,6 +52,7 @@ APP = function () {
     window.addEventListener('mouseup', this.handlerMouseUp.bind(this), false);
     window.addEventListener('keyup', this.handlerKeyUp.bind(this), false);
     window.addEventListener('keydown', this.handlerKeyDown.bind(this), false);
+    this.manageMobile();
 
     // Run
     this.numberOfActiveTweens = 0;
