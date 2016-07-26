@@ -55,3 +55,7 @@ textarea.form-control {
     right:1%;
     top:1%;
 }
+
+@media screen and (min-width: 0px) and (max-width: 720px) {
+    .posRight{ display: none; }
+}

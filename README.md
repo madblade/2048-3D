@@ -3,8 +3,8 @@
 
 This is a simple HTML5/WebGL game, compatible with Chrome (and Firefox), written in JavaScript with three.js.
 
-### Installation
-Download the archive, extract it and launch it with your favorite browser by double clicking `index.html`.
+### Demo
+Live demo available on http://madblade.github.io/2048-3D/.
 
 ### How to play
 Use arrows or `WASD` / `ZQSD` controls to move all blocks in the desired direction.
@@ -29,5 +29,4 @@ You may also zoom with the middle mouse button.
 </p>
 
 ### License
-
 2048-3D is licensed under the AMB license.
