@@ -41,8 +41,17 @@ textarea.form-control {
 }
 
 .beige {
-    position:absolute;
     background-color: #ACA39C;
+}
+
+.posLeft {
+    position:absolute;
     left:1%;
+    top:1%;
+}
+
+.posRight {
+    position:absolute;
+    right:1%;
     top:1%;
 }
