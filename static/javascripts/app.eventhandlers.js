@@ -37,6 +37,11 @@ APP.prototype.handlerMouseMove = function (event) {
         y = 1.65 - c.y,
         z = 1.65 - c.z;
 
+    this.handleCameraRotation(x, y, z);
+
+};
+
+APP.prototype.handleCameraRotation = function(x, y, z) {
     if (z < 0 && Math.abs(z) > Math.abs(x)) {
         // Right hand
         this.keyEnum.LEFT = 37;
@@ -225,6 +230,7 @@ APP.prototype.manageMobile = function() {
         elapsedTime,
         startTime;
     var valid = true;
+    var scope = this;
 
     window.addEventListener('touchstart', function(e){
         var numberTouches = e.touches.length;
@@ -242,10 +248,21 @@ APP.prototype.manageMobile = function() {
         if (e.touches.length > 1) {
             e.preventDefault(); // prevent three.js controls
             valid = false;
+        } else {
+            scope.mouse.x = ( e.changedTouches[0].pageX - scope.windowHalfX );
+            scope.mouse.y = ( e.changedTouches[0].pageY - scope.windowHalfY );
+
+            var c = scope.camera.position;
+            scope.light.position.set(c.x + 5, c.y + 5, c.z);
+
+            var x = 1.65 - c.x,
+                y = 1.65 - c.y,
+                z = 1.65 - c.z;
+
+            scope.handleCameraRotation(x, y, z);
         }
     }, false);
 
-    var scope = this;
     window.addEventListener('touchend', function(e){
         if (!valid) return;
         e.preventDefault();
