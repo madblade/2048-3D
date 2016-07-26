@@ -21,7 +21,7 @@ APP.prototype.handlerMouseWheel = function (event) {
     this.light.position.set(c.x + 5, c.y + 5, c.z);
 };
 
-APP.prototype.handlerMouseMove = function () {
+APP.prototype.handlerMouseMove = function (event) {
     if (this.aModalIsOpen) {
         event.stopPropagation();
         return;

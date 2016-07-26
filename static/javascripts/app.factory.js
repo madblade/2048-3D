@@ -219,10 +219,7 @@ APP.prototype.addCube = function (i, j, k, value) {
             });
             break;
         case 1024:
-            material = new THREE.MeshLambertMaterial({
-                color : new THREE.Color(0xEDD9D0)
-            });
-            break;
+            //break;
         case 2048:
             //break;
         case 4096:

@@ -14,7 +14,7 @@ APP = function () {
     // Detect language (fr/us)
     this.language = window.navigator.userLanguage || window.navigator.language;
     this.initKeyboard(this.language);
-    this.setLanguage("fr");
+    // this.setLanguage("fr");
 
     // Set up renderer
     this.container = document.getElementById('container');
